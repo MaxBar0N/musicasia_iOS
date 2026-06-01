@@ -1,0 +1,47 @@
+name: MusicAsia
+options:
+  bundleIdPrefix: com.musicasia
+  deploymentTarget:
+    iOS: 14.0
+
+packages:
+  Alamofire:
+    url: https://github.com/Alamofire/Alamofire.git
+    from: 5.9.0
+  SnapKit:
+    url: https://github.com/SnapKit/SnapKit.git
+    from: 5.7.0
+  Kingfisher:
+    url: https://github.com/onevcat/Kingfisher.git
+    from: 7.11.0
+
+targets:
+  MusicAsia:
+    type: application
+    platform: iOS
+    sources: 
+      - path: MusicAsia/Sources
+      - path: MusicAsia/Resources
+    dependencies:
+      - package: Alamofire
+      - package: SnapKit
+      - package: Kingfisher
+    info:
+      path: MusicAsia/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
+        NSCameraUsageDescription: "扫描二维码需要使用您的相机"
+        NSBluetoothAlwaysUsageDescription: "连接音乐外设需要使用您的蓝牙"
+        NSBluetoothPeripheralUsageDescription: "连接音乐外设需要使用您的蓝牙"
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        UIBackgroundModes:
+          - audio

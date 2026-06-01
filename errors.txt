@@ -1,0 +1,1507 @@
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:27:24: warning: result of call to 'equalTo' is unused [#no-usage]
+ 25 |         view.addSubview(scrollView)
+ 26 |         scrollView.snp.makeConstraints { make in
+ 27 |             make.edges.equalTo(view.safeAreaLayoutGuide)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 28 |         }
+ 29 |         
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:32:30: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 30 |         scrollView.addSubview(contentView)
+ 31 |         contentView.snp.makeConstraints { make in
+ 32 |             make.edges.width.equalToSuperview()
+    |                              `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 33 |         }
+ 34 |         
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:66:41: warning: result of call to 'offset' is unused [#no-usage]
+ 64 |         
+ 65 |         headerContainer.snp.makeConstraints { make in
+ 66 |             make.top.equalToSuperview().offset(20)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+ 67 |             make.left.right.equalToSuperview().inset(15)
+ 68 |             make.height.equalTo(120)
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:67:48: warning: result of call to 'inset' is unused [#no-usage]
+ 65 |         headerContainer.snp.makeConstraints { make in
+ 66 |             make.top.equalToSuperview().offset(20)
+ 67 |             make.left.right.equalToSuperview().inset(15)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 68 |             make.height.equalTo(120)
+ 69 |         }
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:68:25: warning: result of call to 'equalTo' is unused [#no-usage]
+ 66 |             make.top.equalToSuperview().offset(20)
+ 67 |             make.left.right.equalToSuperview().inset(15)
+ 68 |             make.height.equalTo(120)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 69 |         }
+ 70 |         
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:71:66: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 69 |         }
+ 70 |         
+ 71 |         bannerImageView.snp.makeConstraints { make in make.edges.equalToSuperview() }
+    |                                                                  `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 72 |         overlay.snp.makeConstraints { make in make.edges.equalToSuperview() }
+ 73 |         
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:72:58: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 70 |         
+ 71 |         bannerImageView.snp.makeConstraints { make in make.edges.equalToSuperview() }
+ 72 |         overlay.snp.makeConstraints { make in make.edges.equalToSuperview() }
+    |                                                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 73 |         
+ 74 |         titleLabel.snp.makeConstraints { make in
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:75:49: warning: result of call to 'inset' is unused [#no-usage]
+ 73 |         
+ 74 |         titleLabel.snp.makeConstraints { make in
+ 75 |             make.left.bottom.equalToSuperview().inset(20)
+    |                                                 `- warning: result of call to 'inset' is unused [#no-usage]
+ 76 |         }
+ 77 |         
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:89:58: warning: result of call to 'offset' is unused [#no-usage]
+ 87 |         
+ 88 |         codesStack.snp.makeConstraints { make in
+ 89 |             make.top.equalTo(headerContainer.snp.bottom).offset(30)
+    |                                                          `- warning: result of call to 'offset' is unused [#no-usage]
+ 90 |             make.left.right.equalToSuperview().inset(20)
+ 91 |         }
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:90:48: warning: result of call to 'inset' is unused [#no-usage]
+ 88 |         codesStack.snp.makeConstraints { make in
+ 89 |             make.top.equalTo(headerContainer.snp.bottom).offset(30)
+ 90 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 91 |         }
+ 92 |         
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:121:53: warning: result of call to 'offset' is unused [#no-usage]
+119 |         
+120 |         linksStack.snp.makeConstraints { make in
+121 |             make.top.equalTo(codesStack.snp.bottom).offset(50)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+122 |             make.left.right.equalToSuperview().inset(20)
+123 |             make.height.equalTo(44)
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:122:48: warning: result of call to 'inset' is unused [#no-usage]
+120 |         linksStack.snp.makeConstraints { make in
+121 |             make.top.equalTo(codesStack.snp.bottom).offset(50)
+122 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+123 |             make.height.equalTo(44)
+124 |             make.bottom.equalToSuperview().offset(-30)
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:123:25: warning: result of call to 'equalTo' is unused [#no-usage]
+121 |             make.top.equalTo(codesStack.snp.bottom).offset(50)
+122 |             make.left.right.equalToSuperview().inset(20)
+123 |             make.height.equalTo(44)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+124 |             make.bottom.equalToSuperview().offset(-30)
+125 |         }
+
+MusicAsia/Sources/Features/Order/Controllers/ActivationCodeViewController.swift:124:44: warning: result of call to 'offset' is unused [#no-usage]
+122 |             make.left.right.equalToSuperview().inset(20)
+123 |             make.height.equalTo(44)
+124 |             make.bottom.equalToSuperview().offset(-30)
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+125 |         }
+126 |     }
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:40:24: warning: result of call to 'equalTo' is unused [#no-usage]
+ 38 |         scrollView.delegate = self
+ 39 |         scrollView.snp.makeConstraints { make in
+ 40 |             make.edges.equalTo(view.safeAreaLayoutGuide)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 41 |         }
+ 42 |         
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:45:30: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 43 |         scrollView.addSubview(contentView)
+ 44 |         contentView.snp.makeConstraints { make in
+ 45 |             make.edges.width.equalToSuperview()
+    |                              `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 46 |         }
+ 47 |         
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:53:41: warning: result of call to 'offset' is unused [#no-usage]
+ 51 |         
+ 52 |         ordersStack.snp.makeConstraints { make in
+ 53 |             make.top.equalToSuperview().offset(20)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+ 54 |             make.left.right.equalToSuperview().inset(15)
+ 55 |         }
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:54:48: warning: result of call to 'inset' is unused [#no-usage]
+ 52 |         ordersStack.snp.makeConstraints { make in
+ 53 |             make.top.equalToSuperview().offset(20)
+ 54 |             make.left.right.equalToSuperview().inset(15)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 55 |         }
+ 56 |         
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:67:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 65 |         
+ 66 |         arrowIcon.snp.makeConstraints { make in
+ 67 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 68 |             make.top.equalToSuperview().offset(10)
+ 69 |             make.width.height.equalTo(16)
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:68:41: warning: result of call to 'offset' is unused [#no-usage]
+ 66 |         arrowIcon.snp.makeConstraints { make in
+ 67 |             make.centerX.equalToSuperview()
+ 68 |             make.top.equalToSuperview().offset(10)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+ 69 |             make.width.height.equalTo(16)
+ 70 |         }
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:69:31: warning: result of call to 'equalTo' is unused [#no-usage]
+ 67 |             make.centerX.equalToSuperview()
+ 68 |             make.top.equalToSuperview().offset(10)
+ 69 |             make.width.height.equalTo(16)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 70 |         }
+ 71 |         loadMoreLabel.snp.makeConstraints { make in
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:72:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 70 |         }
+ 71 |         loadMoreLabel.snp.makeConstraints { make in
+ 72 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 73 |             make.top.equalTo(arrowIcon.snp.bottom).offset(5)
+ 74 |         }
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:73:52: warning: result of call to 'offset' is unused [#no-usage]
+ 71 |         loadMoreLabel.snp.makeConstraints { make in
+ 72 |             make.centerX.equalToSuperview()
+ 73 |             make.top.equalTo(arrowIcon.snp.bottom).offset(5)
+    |                                                    `- warning: result of call to 'offset' is unused [#no-usage]
+ 74 |         }
+ 75 |         contentView.addSubview(footerView)
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:77:54: warning: result of call to 'offset' is unused [#no-usage]
+ 75 |         contentView.addSubview(footerView)
+ 76 |         footerView.snp.makeConstraints { make in
+ 77 |             make.top.equalTo(ordersStack.snp.bottom).offset(20)
+    |                                                      `- warning: result of call to 'offset' is unused [#no-usage]
+ 78 |             make.left.right.equalToSuperview()
+ 79 |             make.height.equalTo(60)
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:78:29: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 76 |         footerView.snp.makeConstraints { make in
+ 77 |             make.top.equalTo(ordersStack.snp.bottom).offset(20)
+ 78 |             make.left.right.equalToSuperview()
+    |                             `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 79 |             make.height.equalTo(60)
+ 80 |         }
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:79:25: warning: result of call to 'equalTo' is unused [#no-usage]
+ 77 |             make.top.equalTo(ordersStack.snp.bottom).offset(20)
+ 78 |             make.left.right.equalToSuperview()
+ 79 |             make.height.equalTo(60)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 80 |         }
+ 81 |     }
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:134:67: warning: result of call to 'equalTo' is unused [#no-usage]
+132 |                     
+133 |                     self.ordersStack.addArrangedSubview(row)
+134 |                     row.snp.makeConstraints { make in make.height.equalTo(100) }
+    |                                                                   `- warning: result of call to 'equalTo' is unused [#no-usage]
+135 |                 }
+136 |                 self.updateFooterPosition()
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:148:34: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+146 |         DispatchQueue.main.async {
+147 |             self.contentView.snp.remakeConstraints { make in
+148 |                 make.edges.width.equalToSuperview()
+    |                                  `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+149 |                 make.bottom.equalTo(self.ordersStack.snp.bottom).offset(30)
+150 |             }
+
+MusicAsia/Sources/Features/Order/Controllers/OrderListViewController.swift:149:66: warning: result of call to 'offset' is unused [#no-usage]
+147 |             self.contentView.snp.remakeConstraints { make in
+148 |                 make.edges.width.equalToSuperview()
+149 |                 make.bottom.equalTo(self.ordersStack.snp.bottom).offset(30)
+    |                                                                  `- warning: result of call to 'offset' is unused [#no-usage]
+150 |             }
+151 |         }
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:72:42: warning: result of call to 'offset' is unused [#no-usage]
+ 70 |         // Layout
+ 71 |         iconContainer.snp.makeConstraints { make in
+ 72 |             make.left.equalToSuperview().offset(15)
+    |                                          `- warning: result of call to 'offset' is unused [#no-usage]
+ 73 |             make.centerY.equalToSuperview()
+ 74 |             make.width.height.equalTo(70)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:73:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 71 |         iconContainer.snp.makeConstraints { make in
+ 72 |             make.left.equalToSuperview().offset(15)
+ 73 |             make.centerY.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 74 |             make.width.height.equalTo(70)
+ 75 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:74:31: warning: result of call to 'equalTo' is unused [#no-usage]
+ 72 |             make.left.equalToSuperview().offset(15)
+ 73 |             make.centerY.equalToSuperview()
+ 74 |             make.width.height.equalTo(70)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 75 |         }
+ 76 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:77:58: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 75 |         }
+ 76 |         
+ 77 |         overlay.snp.makeConstraints { make in make.edges.equalToSuperview() }
+    |                                                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 78 |         
+ 79 |         diamondIcon.snp.makeConstraints { make in
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:80:41: warning: result of call to 'offset' is unused [#no-usage]
+ 78 |         
+ 79 |         diamondIcon.snp.makeConstraints { make in
+ 80 |             make.top.equalToSuperview().offset(10)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+ 81 |             make.centerX.equalToSuperview()
+ 82 |             make.width.height.equalTo(30)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:81:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 79 |         diamondIcon.snp.makeConstraints { make in
+ 80 |             make.top.equalToSuperview().offset(10)
+ 81 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 82 |             make.width.height.equalTo(30)
+ 83 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:82:31: warning: result of call to 'equalTo' is unused [#no-usage]
+ 80 |             make.top.equalToSuperview().offset(10)
+ 81 |             make.centerX.equalToSuperview()
+ 82 |             make.width.height.equalTo(30)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 83 |         }
+ 84 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:86:44: warning: result of call to 'offset' is unused [#no-usage]
+ 84 |         
+ 85 |         iconLabel.snp.makeConstraints { make in
+ 86 |             make.bottom.equalToSuperview().offset(-8)
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+ 87 |             make.centerX.equalToSuperview()
+ 88 |             make.left.right.equalToSuperview().inset(2)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:87:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 85 |         iconLabel.snp.makeConstraints { make in
+ 86 |             make.bottom.equalToSuperview().offset(-8)
+ 87 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 88 |             make.left.right.equalToSuperview().inset(2)
+ 89 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:88:48: warning: result of call to 'inset' is unused [#no-usage]
+ 86 |             make.bottom.equalToSuperview().offset(-8)
+ 87 |             make.centerX.equalToSuperview()
+ 88 |             make.left.right.equalToSuperview().inset(2)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 89 |         }
+ 90 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:92:45: warning: result of call to 'offset' is unused [#no-usage]
+ 90 |         
+ 91 |         titleLabel.snp.makeConstraints { make in
+ 92 |             make.top.equalTo(iconContainer).offset(5)
+    |                                             `- warning: result of call to 'offset' is unused [#no-usage]
+ 93 |             make.left.equalTo(iconContainer.snp.right).offset(15)
+ 94 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:93:56: warning: result of call to 'offset' is unused [#no-usage]
+ 91 |         titleLabel.snp.makeConstraints { make in
+ 92 |             make.top.equalTo(iconContainer).offset(5)
+ 93 |             make.left.equalTo(iconContainer.snp.right).offset(15)
+    |                                                        `- warning: result of call to 'offset' is unused [#no-usage]
+ 94 |         }
+ 95 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:97:53: warning: result of call to 'offset' is unused [#no-usage]
+ 95 |         
+ 96 |         orderNoLabel.snp.makeConstraints { make in
+ 97 |             make.top.equalTo(titleLabel.snp.bottom).offset(5)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+ 98 |             make.left.equalTo(titleLabel)
+ 99 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:98:23: warning: result of call to 'equalTo' is unused [#no-usage]
+ 96 |         orderNoLabel.snp.makeConstraints { make in
+ 97 |             make.top.equalTo(titleLabel.snp.bottom).offset(5)
+ 98 |             make.left.equalTo(titleLabel)
+    |                       `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 99 |         }
+100 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:102:55: warning: result of call to 'offset' is unused [#no-usage]
+100 |         
+101 |         timeLabel.snp.makeConstraints { make in
+102 |             make.top.equalTo(orderNoLabel.snp.bottom).offset(5)
+    |                                                       `- warning: result of call to 'offset' is unused [#no-usage]
+103 |             make.left.equalTo(titleLabel)
+104 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:103:23: warning: result of call to 'equalTo' is unused [#no-usage]
+101 |         timeLabel.snp.makeConstraints { make in
+102 |             make.top.equalTo(orderNoLabel.snp.bottom).offset(5)
+103 |             make.left.equalTo(titleLabel)
+    |                       `- warning: result of call to 'equalTo' is unused [#no-usage]
+104 |         }
+105 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:107:43: warning: result of call to 'offset' is unused [#no-usage]
+105 |         
+106 |         viewCodeButton.snp.makeConstraints { make in
+107 |             make.right.equalToSuperview().offset(-15)
+    |                                           `- warning: result of call to 'offset' is unused [#no-usage]
+108 |             make.centerY.equalToSuperview()
+109 |             make.width.equalTo(80)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:108:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+106 |         viewCodeButton.snp.makeConstraints { make in
+107 |             make.right.equalToSuperview().offset(-15)
+108 |             make.centerY.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+109 |             make.width.equalTo(80)
+110 |             make.height.equalTo(28)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:109:24: warning: result of call to 'equalTo' is unused [#no-usage]
+107 |             make.right.equalToSuperview().offset(-15)
+108 |             make.centerY.equalToSuperview()
+109 |             make.width.equalTo(80)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+110 |             make.height.equalTo(28)
+111 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:110:25: warning: result of call to 'equalTo' is unused [#no-usage]
+108 |             make.centerY.equalToSuperview()
+109 |             make.width.equalTo(80)
+110 |             make.height.equalTo(28)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+111 |         }
+112 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:157:31: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+155 |         
+156 |         codeLabel.snp.makeConstraints { make in
+157 |             make.left.centerY.equalToSuperview()
+    |                               `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+158 |         }
+159 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:161:32: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+159 |         
+160 |         copyButton.snp.makeConstraints { make in
+161 |             make.right.centerY.equalToSuperview()
+    |                                `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+162 |             make.width.height.equalTo(30)
+163 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:162:31: warning: result of call to 'equalTo' is unused [#no-usage]
+160 |         copyButton.snp.makeConstraints { make in
+161 |             make.right.centerY.equalToSuperview()
+162 |             make.width.height.equalTo(30)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+163 |         }
+164 |     }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:216:25: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+214 |         // Layout
+215 |         containerView.snp.makeConstraints { make in
+216 |             make.center.equalToSuperview()
+    |                         `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+217 |             make.left.right.equalToSuperview().inset(40)
+218 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:217:48: warning: result of call to 'inset' is unused [#no-usage]
+215 |         containerView.snp.makeConstraints { make in
+216 |             make.center.equalToSuperview()
+217 |             make.left.right.equalToSuperview().inset(40)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+218 |         }
+219 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:221:41: warning: result of call to 'offset' is unused [#no-usage]
+219 |         
+220 |         titleLabel.snp.makeConstraints { make in
+221 |             make.top.equalToSuperview().offset(20)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+222 |             make.centerX.equalToSuperview()
+223 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:222:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+220 |         titleLabel.snp.makeConstraints { make in
+221 |             make.top.equalToSuperview().offset(20)
+222 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+223 |         }
+224 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:226:26: warning: result of call to 'equalTo' is unused [#no-usage]
+224 |         
+225 |         closeBtn.snp.makeConstraints { make in
+226 |             make.centerY.equalTo(titleLabel)
+    |                          `- warning: result of call to 'equalTo' is unused [#no-usage]
+227 |             make.right.equalToSuperview().offset(-15)
+228 |             make.width.height.equalTo(30)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:227:43: warning: result of call to 'offset' is unused [#no-usage]
+225 |         closeBtn.snp.makeConstraints { make in
+226 |             make.centerY.equalTo(titleLabel)
+227 |             make.right.equalToSuperview().offset(-15)
+    |                                           `- warning: result of call to 'offset' is unused [#no-usage]
+228 |             make.width.height.equalTo(30)
+229 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:228:31: warning: result of call to 'equalTo' is unused [#no-usage]
+226 |             make.centerY.equalTo(titleLabel)
+227 |             make.right.equalToSuperview().offset(-15)
+228 |             make.width.height.equalTo(30)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+229 |         }
+230 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:232:53: warning: result of call to 'offset' is unused [#no-usage]
+230 |         
+231 |         msgLabel.snp.makeConstraints { make in
+232 |             make.top.equalTo(titleLabel.snp.bottom).offset(20)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+233 |             make.left.right.equalToSuperview().inset(20)
+234 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:233:48: warning: result of call to 'inset' is unused [#no-usage]
+231 |         msgLabel.snp.makeConstraints { make in
+232 |             make.top.equalTo(titleLabel.snp.bottom).offset(20)
+233 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+234 |         }
+235 |         
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:237:51: warning: result of call to 'offset' is unused [#no-usage]
+235 |         
+236 |         closeButton.snp.makeConstraints { make in
+237 |             make.top.equalTo(msgLabel.snp.bottom).offset(25)
+    |                                                   `- warning: result of call to 'offset' is unused [#no-usage]
+238 |             make.left.right.equalToSuperview().inset(20)
+239 |             make.bottom.equalToSuperview().offset(-20)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:238:48: warning: result of call to 'inset' is unused [#no-usage]
+236 |         closeButton.snp.makeConstraints { make in
+237 |             make.top.equalTo(msgLabel.snp.bottom).offset(25)
+238 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+239 |             make.bottom.equalToSuperview().offset(-20)
+240 |             make.height.equalTo(44)
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:239:44: warning: result of call to 'offset' is unused [#no-usage]
+237 |             make.top.equalTo(msgLabel.snp.bottom).offset(25)
+238 |             make.left.right.equalToSuperview().inset(20)
+239 |             make.bottom.equalToSuperview().offset(-20)
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+240 |             make.height.equalTo(44)
+241 |         }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:240:25: warning: result of call to 'equalTo' is unused [#no-usage]
+238 |             make.left.right.equalToSuperview().inset(20)
+239 |             make.bottom.equalToSuperview().offset(-20)
+240 |             make.height.equalTo(44)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+241 |         }
+242 |     }
+
+MusicAsia/Sources/Features/Order/Views/OrderViews.swift:247:50: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+245 |         alpha = 0
+246 |         view.addSubview(self)
+247 |         snp.makeConstraints { make in make.edges.equalToSuperview() }
+    |                                                  `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+248 |         UIView.animate(withDuration: 0.3) { self.alpha = 1 }
+249 |     }
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:27:24: warning: result of call to 'equalTo' is unused [#no-usage]
+ 25 |         view.addSubview(scrollView)
+ 26 |         scrollView.snp.makeConstraints { make in
+ 27 |             make.edges.equalTo(view.safeAreaLayoutGuide)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 28 |         }
+ 29 |         
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:32:30: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 30 |         scrollView.addSubview(contentView)
+ 31 |         contentView.snp.makeConstraints { make in
+ 32 |             make.edges.width.equalToSuperview()
+    |                              `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 33 |         }
+ 34 |         
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:41:41: warning: result of call to 'offset' is unused [#no-usage]
+ 39 |         contentView.addSubview(adsStack)
+ 40 |         adsStack.snp.makeConstraints { make in
+ 41 |             make.top.equalToSuperview().offset(20)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+ 42 |             make.left.right.equalToSuperview().inset(20)
+ 43 |             make.height.equalTo(120)
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:42:48: warning: result of call to 'inset' is unused [#no-usage]
+ 40 |         adsStack.snp.makeConstraints { make in
+ 41 |             make.top.equalToSuperview().offset(20)
+ 42 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 43 |             make.height.equalTo(120)
+ 44 |         }
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:43:25: warning: result of call to 'equalTo' is unused [#no-usage]
+ 41 |             make.top.equalToSuperview().offset(20)
+ 42 |             make.left.right.equalToSuperview().inset(20)
+ 43 |             make.height.equalTo(120)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 44 |         }
+ 45 |         
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:55:51: warning: result of call to 'offset' is unused [#no-usage]
+ 53 |         contentView.addSubview(songsHeader)
+ 54 |         songsHeader.snp.makeConstraints { make in
+ 55 |             make.top.equalTo(adsStack.snp.bottom).offset(30)
+    |                                                   `- warning: result of call to 'offset' is unused [#no-usage]
+ 56 |             make.left.equalToSuperview().offset(20)
+ 57 |         }
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:56:42: warning: result of call to 'offset' is unused [#no-usage]
+ 54 |         songsHeader.snp.makeConstraints { make in
+ 55 |             make.top.equalTo(adsStack.snp.bottom).offset(30)
+ 56 |             make.left.equalToSuperview().offset(20)
+    |                                          `- warning: result of call to 'offset' is unused [#no-usage]
+ 57 |         }
+ 58 |         
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:63:54: warning: result of call to 'offset' is unused [#no-usage]
+ 61 |         contentView.addSubview(songsStack)
+ 62 |         songsStack.snp.makeConstraints { make in
+ 63 |             make.top.equalTo(songsHeader.snp.bottom).offset(20)
+    |                                                      `- warning: result of call to 'offset' is unused [#no-usage]
+ 64 |             make.left.right.equalToSuperview().inset(20)
+ 65 |         }
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:64:48: warning: result of call to 'inset' is unused [#no-usage]
+ 62 |         songsStack.snp.makeConstraints { make in
+ 63 |             make.top.equalTo(songsHeader.snp.bottom).offset(20)
+ 64 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 65 |         }
+ 66 |         
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:71:53: warning: result of call to 'offset' is unused [#no-usage]
+ 69 |         contentView.addSubview(albumsHeader)
+ 70 |         albumsHeader.snp.makeConstraints { make in
+ 71 |             make.top.equalTo(songsStack.snp.bottom).offset(40)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+ 72 |             make.left.equalToSuperview().offset(20)
+ 73 |         }
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:72:42: warning: result of call to 'offset' is unused [#no-usage]
+ 70 |         albumsHeader.snp.makeConstraints { make in
+ 71 |             make.top.equalTo(songsStack.snp.bottom).offset(40)
+ 72 |             make.left.equalToSuperview().offset(20)
+    |                                          `- warning: result of call to 'offset' is unused [#no-usage]
+ 73 |         }
+ 74 |         
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:80:55: warning: result of call to 'offset' is unused [#no-usage]
+ 78 |         contentView.addSubview(albumsStack)
+ 79 |         albumsStack.snp.makeConstraints { make in
+ 80 |             make.top.equalTo(albumsHeader.snp.bottom).offset(20)
+    |                                                       `- warning: result of call to 'offset' is unused [#no-usage]
+ 81 |             make.left.right.equalToSuperview().inset(20)
+ 82 |             make.height.equalTo(120)
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:81:48: warning: result of call to 'inset' is unused [#no-usage]
+ 79 |         albumsStack.snp.makeConstraints { make in
+ 80 |             make.top.equalTo(albumsHeader.snp.bottom).offset(20)
+ 81 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 82 |             make.height.equalTo(120)
+ 83 |             make.bottom.equalToSuperview().offset(-30) // Important for scrollView content size
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:82:25: warning: result of call to 'equalTo' is unused [#no-usage]
+ 80 |             make.top.equalTo(albumsHeader.snp.bottom).offset(20)
+ 81 |             make.left.right.equalToSuperview().inset(20)
+ 82 |             make.height.equalTo(120)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 83 |             make.bottom.equalToSuperview().offset(-30) // Important for scrollView content size
+ 84 |         }
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:83:44: warning: result of call to 'offset' is unused [#no-usage]
+ 81 |             make.left.right.equalToSuperview().inset(20)
+ 82 |             make.height.equalTo(120)
+ 83 |             make.bottom.equalToSuperview().offset(-30) // Important for scrollView content size
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+ 84 |         }
+ 85 |     }
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:125:59: warning: result of call to 'equalTo' is unused [#no-usage]
+123 |             }
+124 |             songsStack.addArrangedSubview(row)
+125 |             row.snp.makeConstraints { make in make.height.equalTo(44) }
+    |                                                           `- warning: result of call to 'equalTo' is unused [#no-usage]
+126 |         }
+127 |         
+
+MusicAsia/Sources/Features/Home/Controllers/HomeViewController.swift:138:40: warning: variable 'self' was written to, but never read
+136 |                                 isFavorited: false)
+137 |             card.configure(with: uiAlbum)
+138 |             card.onFavTapped = { [weak self] in
+    |                                        `- warning: variable 'self' was written to, but never read
+139 |                 // Home页的专辑暂不支持收藏
+140 |             }
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:23:31: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 21 |         
+ 22 |         indicator.snp.makeConstraints { make in
+ 23 |             make.left.centerY.equalToSuperview()
+    |                               `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 24 |             make.width.equalTo(3)
+ 25 |             make.height.equalTo(14)
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:24:24: warning: result of call to 'equalTo' is unused [#no-usage]
+ 22 |         indicator.snp.makeConstraints { make in
+ 23 |             make.left.centerY.equalToSuperview()
+ 24 |             make.width.equalTo(3)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 25 |             make.height.equalTo(14)
+ 26 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:25:25: warning: result of call to 'equalTo' is unused [#no-usage]
+ 23 |             make.left.centerY.equalToSuperview()
+ 24 |             make.width.equalTo(3)
+ 25 |             make.height.equalTo(14)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 26 |         }
+ 27 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:29:52: warning: result of call to 'offset' is unused [#no-usage]
+ 27 |         
+ 28 |         titleLabel.snp.makeConstraints { make in
+ 29 |             make.left.equalTo(indicator.snp.right).offset(8)
+    |                                                    `- warning: result of call to 'offset' is unused [#no-usage]
+ 30 |             make.centerY.right.equalToSuperview()
+ 31 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:30:32: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 28 |         titleLabel.snp.makeConstraints { make in
+ 29 |             make.left.equalTo(indicator.snp.right).offset(8)
+ 30 |             make.centerY.right.equalToSuperview()
+    |                                `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 31 |         }
+ 32 |     }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:68:60: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 66 |         addSubview(titleLabel)
+ 67 |         
+ 68 |         imageView.snp.makeConstraints { make in make.edges.equalToSuperview() }
+    |                                                            `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 69 |         
+ 70 |         overlay.snp.makeConstraints { make in
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:71:36: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 69 |         
+ 70 |         overlay.snp.makeConstraints { make in
+ 71 |             make.left.right.bottom.equalToSuperview()
+    |                                    `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 72 |             make.height.equalTo(40)
+ 73 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:72:25: warning: result of call to 'equalTo' is unused [#no-usage]
+ 70 |         overlay.snp.makeConstraints { make in
+ 71 |             make.left.right.bottom.equalToSuperview()
+ 72 |             make.height.equalTo(40)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 73 |         }
+ 74 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:76:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 74 |         
+ 75 |         titleLabel.snp.makeConstraints { make in
+ 76 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 77 |             make.bottom.equalToSuperview().offset(-10)
+ 78 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:77:44: warning: result of call to 'offset' is unused [#no-usage]
+ 75 |         titleLabel.snp.makeConstraints { make in
+ 76 |             make.centerX.equalToSuperview()
+ 77 |             make.bottom.equalToSuperview().offset(-10)
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+ 78 |         }
+ 79 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:122:31: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+120 |         
+121 |         textStack.snp.makeConstraints { make in
+122 |             make.left.centerY.equalToSuperview()
+    |                               `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+123 |             make.right.equalTo(favButton.snp.left).offset(-10)
+124 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:123:52: warning: result of call to 'offset' is unused [#no-usage]
+121 |         textStack.snp.makeConstraints { make in
+122 |             make.left.centerY.equalToSuperview()
+123 |             make.right.equalTo(favButton.snp.left).offset(-10)
+    |                                                    `- warning: result of call to 'offset' is unused [#no-usage]
+124 |         }
+125 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:127:32: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+125 |         
+126 |         playButton.snp.makeConstraints { make in
+127 |             make.right.centerY.equalToSuperview()
+    |                                `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+128 |             make.width.height.equalTo(30)
+129 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:128:31: warning: result of call to 'equalTo' is unused [#no-usage]
+126 |         playButton.snp.makeConstraints { make in
+127 |             make.right.centerY.equalToSuperview()
+128 |             make.width.height.equalTo(30)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+129 |         }
+130 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:132:53: warning: result of call to 'offset' is unused [#no-usage]
+130 |         
+131 |         favButton.snp.makeConstraints { make in
+132 |             make.right.equalTo(playButton.snp.left).offset(-15)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+133 |             make.centerY.equalToSuperview()
+134 |             make.width.height.equalTo(30)
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:133:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+131 |         favButton.snp.makeConstraints { make in
+132 |             make.right.equalTo(playButton.snp.left).offset(-15)
+133 |             make.centerY.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+134 |             make.width.height.equalTo(30)
+135 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:134:31: warning: result of call to 'equalTo' is unused [#no-usage]
+132 |             make.right.equalTo(playButton.snp.left).offset(-15)
+133 |             make.centerY.equalToSuperview()
+134 |             make.width.height.equalTo(30)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+135 |         }
+136 |     }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:199:60: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+197 |         addSubview(playButton)
+198 |         
+199 |         imageView.snp.makeConstraints { make in make.edges.equalToSuperview() }
+    |                                                            `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+200 |         
+201 |         overlay.snp.makeConstraints { make in
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:202:36: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+200 |         
+201 |         overlay.snp.makeConstraints { make in
+202 |             make.left.right.bottom.equalToSuperview()
+    |                                    `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+203 |             make.height.equalTo(40)
+204 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:203:25: warning: result of call to 'equalTo' is unused [#no-usage]
+201 |         overlay.snp.makeConstraints { make in
+202 |             make.left.right.bottom.equalToSuperview()
+203 |             make.height.equalTo(40)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+204 |         }
+205 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:207:42: warning: result of call to 'offset' is unused [#no-usage]
+205 |         
+206 |         titleLabel.snp.makeConstraints { make in
+207 |             make.left.equalToSuperview().offset(10)
+    |                                          `- warning: result of call to 'offset' is unused [#no-usage]
+208 |             make.bottom.equalToSuperview().offset(-10)
+209 |             make.right.equalTo(favButton.snp.left).offset(-5)
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:208:44: warning: result of call to 'offset' is unused [#no-usage]
+206 |         titleLabel.snp.makeConstraints { make in
+207 |             make.left.equalToSuperview().offset(10)
+208 |             make.bottom.equalToSuperview().offset(-10)
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+209 |             make.right.equalTo(favButton.snp.left).offset(-5)
+210 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:209:52: warning: result of call to 'offset' is unused [#no-usage]
+207 |             make.left.equalToSuperview().offset(10)
+208 |             make.bottom.equalToSuperview().offset(-10)
+209 |             make.right.equalTo(favButton.snp.left).offset(-5)
+    |                                                    `- warning: result of call to 'offset' is unused [#no-usage]
+210 |         }
+211 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:213:43: warning: result of call to 'offset' is unused [#no-usage]
+211 |         
+212 |         playButton.snp.makeConstraints { make in
+213 |             make.right.equalToSuperview().offset(-10)
+    |                                           `- warning: result of call to 'offset' is unused [#no-usage]
+214 |             make.centerY.equalTo(titleLabel)
+215 |             make.width.height.equalTo(24)
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:214:26: warning: result of call to 'equalTo' is unused [#no-usage]
+212 |         playButton.snp.makeConstraints { make in
+213 |             make.right.equalToSuperview().offset(-10)
+214 |             make.centerY.equalTo(titleLabel)
+    |                          `- warning: result of call to 'equalTo' is unused [#no-usage]
+215 |             make.width.height.equalTo(24)
+216 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:215:31: warning: result of call to 'equalTo' is unused [#no-usage]
+213 |             make.right.equalToSuperview().offset(-10)
+214 |             make.centerY.equalTo(titleLabel)
+215 |             make.width.height.equalTo(24)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+216 |         }
+217 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:219:53: warning: result of call to 'offset' is unused [#no-usage]
+217 |         
+218 |         favButton.snp.makeConstraints { make in
+219 |             make.right.equalTo(playButton.snp.left).offset(-10)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+220 |             make.centerY.equalTo(titleLabel)
+221 |             make.width.height.equalTo(24)
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:220:26: warning: result of call to 'equalTo' is unused [#no-usage]
+218 |         favButton.snp.makeConstraints { make in
+219 |             make.right.equalTo(playButton.snp.left).offset(-10)
+220 |             make.centerY.equalTo(titleLabel)
+    |                          `- warning: result of call to 'equalTo' is unused [#no-usage]
+221 |             make.width.height.equalTo(24)
+222 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:221:31: warning: result of call to 'equalTo' is unused [#no-usage]
+219 |             make.right.equalTo(playButton.snp.left).offset(-10)
+220 |             make.centerY.equalTo(titleLabel)
+221 |             make.width.height.equalTo(24)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+222 |         }
+223 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:282:25: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+280 |         
+281 |         containerView.snp.makeConstraints { make in
+282 |             make.center.equalToSuperview()
+    |                         `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+283 |             make.left.right.equalToSuperview().inset(40)
+284 |             make.height.equalTo(150)
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:283:48: warning: result of call to 'inset' is unused [#no-usage]
+281 |         containerView.snp.makeConstraints { make in
+282 |             make.center.equalToSuperview()
+283 |             make.left.right.equalToSuperview().inset(40)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+284 |             make.height.equalTo(150)
+285 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:284:25: warning: result of call to 'equalTo' is unused [#no-usage]
+282 |             make.center.equalToSuperview()
+283 |             make.left.right.equalToSuperview().inset(40)
+284 |             make.height.equalTo(150)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+285 |         }
+286 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:288:41: warning: result of call to 'offset' is unused [#no-usage]
+286 |         
+287 |         titleLabel.snp.makeConstraints { make in
+288 |             make.top.equalToSuperview().offset(20)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+289 |             make.centerX.equalToSuperview()
+290 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:289:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+287 |         titleLabel.snp.makeConstraints { make in
+288 |             make.top.equalToSuperview().offset(20)
+289 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+290 |         }
+291 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:293:26: warning: result of call to 'equalTo' is unused [#no-usage]
+291 |         
+292 |         closeBtn.snp.makeConstraints { make in
+293 |             make.centerY.equalTo(titleLabel)
+    |                          `- warning: result of call to 'equalTo' is unused [#no-usage]
+294 |             make.right.equalToSuperview().offset(-15)
+295 |             make.width.height.equalTo(30)
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:294:43: warning: result of call to 'offset' is unused [#no-usage]
+292 |         closeBtn.snp.makeConstraints { make in
+293 |             make.centerY.equalTo(titleLabel)
+294 |             make.right.equalToSuperview().offset(-15)
+    |                                           `- warning: result of call to 'offset' is unused [#no-usage]
+295 |             make.width.height.equalTo(30)
+296 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:295:31: warning: result of call to 'equalTo' is unused [#no-usage]
+293 |             make.centerY.equalTo(titleLabel)
+294 |             make.right.equalToSuperview().offset(-15)
+295 |             make.width.height.equalTo(30)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+296 |         }
+297 |         
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:299:53: warning: result of call to 'offset' is unused [#no-usage]
+297 |         
+298 |         msgLabel.snp.makeConstraints { make in
+299 |             make.top.equalTo(titleLabel.snp.bottom).offset(30)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+300 |             make.centerX.equalToSuperview()
+301 |         }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:300:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+298 |         msgLabel.snp.makeConstraints { make in
+299 |             make.top.equalTo(titleLabel.snp.bottom).offset(30)
+300 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+301 |         }
+302 |     }
+
+MusicAsia/Sources/Features/Home/Views/HomeViews.swift:311:50: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+309 |         alpha = 0
+310 |         view.addSubview(self)
+311 |         snp.makeConstraints { make in make.edges.equalToSuperview() }
+    |                                                  `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+312 |         UIView.animate(withDuration: 0.3) { self.alpha = 1 }
+313 |     }
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:73:56: warning: result of call to 'offset' is unused [#no-usage]
+ 71 |         
+ 72 |         searchContainer.snp.makeConstraints { make in
+ 73 |             make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+    |                                                        `- warning: result of call to 'offset' is unused [#no-usage]
+ 74 |             make.left.right.equalToSuperview().inset(20)
+ 75 |             make.height.equalTo(40)
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:74:48: warning: result of call to 'inset' is unused [#no-usage]
+ 72 |         searchContainer.snp.makeConstraints { make in
+ 73 |             make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+ 74 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+ 75 |             make.height.equalTo(40)
+ 76 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:75:25: warning: result of call to 'equalTo' is unused [#no-usage]
+ 73 |             make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+ 74 |             make.left.right.equalToSuperview().inset(20)
+ 75 |             make.height.equalTo(40)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 76 |         }
+ 77 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:79:42: warning: result of call to 'offset' is unused [#no-usage]
+ 77 |         
+ 78 |         searchTextField.snp.makeConstraints { make in
+ 79 |             make.left.equalToSuperview().offset(15)
+    |                                          `- warning: result of call to 'offset' is unused [#no-usage]
+ 80 |             make.centerY.equalToSuperview()
+ 81 |             make.right.equalTo(searchIcon.snp.left).offset(-10)
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:80:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 78 |         searchTextField.snp.makeConstraints { make in
+ 79 |             make.left.equalToSuperview().offset(15)
+ 80 |             make.centerY.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 81 |             make.right.equalTo(searchIcon.snp.left).offset(-10)
+ 82 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:81:53: warning: result of call to 'offset' is unused [#no-usage]
+ 79 |             make.left.equalToSuperview().offset(15)
+ 80 |             make.centerY.equalToSuperview()
+ 81 |             make.right.equalTo(searchIcon.snp.left).offset(-10)
+    |                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+ 82 |         }
+ 83 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:85:43: warning: result of call to 'offset' is unused [#no-usage]
+ 83 |         
+ 84 |         searchIcon.snp.makeConstraints { make in
+ 85 |             make.right.equalToSuperview().offset(-15)
+    |                                           `- warning: result of call to 'offset' is unused [#no-usage]
+ 86 |             make.centerY.equalToSuperview()
+ 87 |             make.width.height.equalTo(20)
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:86:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 84 |         searchIcon.snp.makeConstraints { make in
+ 85 |             make.right.equalToSuperview().offset(-15)
+ 86 |             make.centerY.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 87 |             make.width.height.equalTo(20)
+ 88 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:87:31: warning: result of call to 'equalTo' is unused [#no-usage]
+ 85 |             make.right.equalToSuperview().offset(-15)
+ 86 |             make.centerY.equalToSuperview()
+ 87 |             make.width.height.equalTo(20)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 88 |         }
+ 89 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:105:58: warning: result of call to 'offset' is unused [#no-usage]
+103 |         
+104 |         tabStackView.snp.makeConstraints { make in
+105 |             make.top.equalTo(searchContainer.snp.bottom).offset(15)
+    |                                                          `- warning: result of call to 'offset' is unused [#no-usage]
+106 |             make.left.right.equalToSuperview().inset(20)
+107 |             make.height.equalTo(40)
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:106:48: warning: result of call to 'inset' is unused [#no-usage]
+104 |         tabStackView.snp.makeConstraints { make in
+105 |             make.top.equalTo(searchContainer.snp.bottom).offset(15)
+106 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+107 |             make.height.equalTo(40)
+108 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:107:25: warning: result of call to 'equalTo' is unused [#no-usage]
+105 |             make.top.equalTo(searchContainer.snp.bottom).offset(15)
+106 |             make.left.right.equalToSuperview().inset(20)
+107 |             make.height.equalTo(40)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+108 |         }
+109 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:114:22: warning: result of call to 'equalTo' is unused [#no-usage]
+112 |         // 初始位置设定在第一个
+113 |         tabIndicator.snp.makeConstraints { make in
+114 |             make.top.equalTo(tabStackView.snp.bottom)
+    |                      `- warning: result of call to 'equalTo' is unused [#no-usage]
+115 |             make.height.equalTo(2)
+116 |             make.width.equalTo(40)
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:115:25: warning: result of call to 'equalTo' is unused [#no-usage]
+113 |         tabIndicator.snp.makeConstraints { make in
+114 |             make.top.equalTo(tabStackView.snp.bottom)
+115 |             make.height.equalTo(2)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+116 |             make.width.equalTo(40)
+117 |             make.centerX.equalTo(tabButtons[0])
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:116:24: warning: result of call to 'equalTo' is unused [#no-usage]
+114 |             make.top.equalTo(tabStackView.snp.bottom)
+115 |             make.height.equalTo(2)
+116 |             make.width.equalTo(40)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+117 |             make.centerX.equalTo(tabButtons[0])
+118 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:117:26: warning: result of call to 'equalTo' is unused [#no-usage]
+115 |             make.height.equalTo(2)
+116 |             make.width.equalTo(40)
+117 |             make.centerX.equalTo(tabButtons[0])
+    |                          `- warning: result of call to 'equalTo' is unused [#no-usage]
+118 |         }
+119 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:124:55: warning: result of call to 'offset' is unused [#no-usage]
+122 |         scrollView.delegate = self
+123 |         scrollView.snp.makeConstraints { make in
+124 |             make.top.equalTo(tabIndicator.snp.bottom).offset(10)
+    |                                                       `- warning: result of call to 'offset' is unused [#no-usage]
+125 |             make.left.right.bottom.equalTo(view.safeAreaLayoutGuide)
+126 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:125:36: warning: result of call to 'equalTo' is unused [#no-usage]
+123 |         scrollView.snp.makeConstraints { make in
+124 |             make.top.equalTo(tabIndicator.snp.bottom).offset(10)
+125 |             make.left.right.bottom.equalTo(view.safeAreaLayoutGuide)
+    |                                    `- warning: result of call to 'equalTo' is unused [#no-usage]
+126 |         }
+127 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:130:30: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+128 |         scrollView.addSubview(contentView)
+129 |         contentView.snp.makeConstraints { make in
+130 |             make.edges.width.equalToSuperview()
+    |                              `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+131 |         }
+132 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:137:41: warning: result of call to 'offset' is unused [#no-usage]
+135 |         contentView.addSubview(songsStack)
+136 |         songsStack.snp.makeConstraints { make in
+137 |             make.top.equalToSuperview().offset(10)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+138 |             make.left.right.equalToSuperview().inset(20)
+139 |             make.bottom.equalToSuperview().offset(-80) // 预留初始空间
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:138:48: warning: result of call to 'inset' is unused [#no-usage]
+136 |         songsStack.snp.makeConstraints { make in
+137 |             make.top.equalToSuperview().offset(10)
+138 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+139 |             make.bottom.equalToSuperview().offset(-80) // 预留初始空间
+140 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:139:44: warning: result of call to 'offset' is unused [#no-usage]
+137 |             make.top.equalToSuperview().offset(10)
+138 |             make.left.right.equalToSuperview().inset(20)
+139 |             make.bottom.equalToSuperview().offset(-80) // 预留初始空间
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+140 |         }
+141 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:153:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+151 |         
+152 |         arrowIcon.snp.makeConstraints { make in
+153 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+154 |             make.top.equalToSuperview().offset(10)
+155 |             make.width.height.equalTo(16)
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:154:41: warning: result of call to 'offset' is unused [#no-usage]
+152 |         arrowIcon.snp.makeConstraints { make in
+153 |             make.centerX.equalToSuperview()
+154 |             make.top.equalToSuperview().offset(10)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+155 |             make.width.height.equalTo(16)
+156 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:155:31: warning: result of call to 'equalTo' is unused [#no-usage]
+153 |             make.centerX.equalToSuperview()
+154 |             make.top.equalToSuperview().offset(10)
+155 |             make.width.height.equalTo(16)
+    |                               `- warning: result of call to 'equalTo' is unused [#no-usage]
+156 |         }
+157 |         loadMoreLabel.snp.makeConstraints { make in
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:158:26: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+156 |         }
+157 |         loadMoreLabel.snp.makeConstraints { make in
+158 |             make.centerX.equalToSuperview()
+    |                          `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+159 |             make.top.equalTo(arrowIcon.snp.bottom).offset(5)
+160 |         }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:159:52: warning: result of call to 'offset' is unused [#no-usage]
+157 |         loadMoreLabel.snp.makeConstraints { make in
+158 |             make.centerX.equalToSuperview()
+159 |             make.top.equalTo(arrowIcon.snp.bottom).offset(5)
+    |                                                    `- warning: result of call to 'offset' is unused [#no-usage]
+160 |         }
+161 |         
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:187:26: warning: result of call to 'equalTo' is unused [#no-usage]
+185 |         UIView.animate(withDuration: 0.3) {
+186 |             self.tabIndicator.snp.remakeConstraints { make in
+187 |                 make.top.equalTo(self.tabStackView.snp.bottom)
+    |                          `- warning: result of call to 'equalTo' is unused [#no-usage]
+188 |                 make.height.equalTo(2)
+189 |                 make.width.equalTo(40)
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:188:29: warning: result of call to 'equalTo' is unused [#no-usage]
+186 |             self.tabIndicator.snp.remakeConstraints { make in
+187 |                 make.top.equalTo(self.tabStackView.snp.bottom)
+188 |                 make.height.equalTo(2)
+    |                             `- warning: result of call to 'equalTo' is unused [#no-usage]
+189 |                 make.width.equalTo(40)
+190 |                 make.centerX.equalTo(self.tabButtons[index])
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:189:28: warning: result of call to 'equalTo' is unused [#no-usage]
+187 |                 make.top.equalTo(self.tabStackView.snp.bottom)
+188 |                 make.height.equalTo(2)
+189 |                 make.width.equalTo(40)
+    |                            `- warning: result of call to 'equalTo' is unused [#no-usage]
+190 |                 make.centerX.equalTo(self.tabButtons[index])
+191 |             }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:190:30: warning: result of call to 'equalTo' is unused [#no-usage]
+188 |                 make.height.equalTo(2)
+189 |                 make.width.equalTo(40)
+190 |                 make.centerX.equalTo(self.tabButtons[index])
+    |                              `- warning: result of call to 'equalTo' is unused [#no-usage]
+191 |             }
+192 |             self.view.layoutIfNeeded()
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:281:59: warning: result of call to 'equalTo' is unused [#no-usage]
+279 |             }
+280 |             songsStack.addArrangedSubview(row)
+281 |             row.snp.makeConstraints { make in make.height.equalTo(44) }
+    |                                                           `- warning: result of call to 'equalTo' is unused [#no-usage]
+282 |         }
+283 |         updateFooterPosition()
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:294:45: warning: result of call to 'offset' is unused [#no-usage]
+292 |             
+293 |             self.songsStack.snp.remakeConstraints { make in
+294 |                 make.top.equalToSuperview().offset(10)
+    |                                             `- warning: result of call to 'offset' is unused [#no-usage]
+295 |                 make.left.right.equalToSuperview().inset(20)
+296 |             }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:295:52: warning: result of call to 'inset' is unused [#no-usage]
+293 |             self.songsStack.snp.remakeConstraints { make in
+294 |                 make.top.equalToSuperview().offset(10)
+295 |                 make.left.right.equalToSuperview().inset(20)
+    |                                                    `- warning: result of call to 'inset' is unused [#no-usage]
+296 |             }
+297 |             
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:300:38: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+298 |             if self.footerView.isHidden {
+299 |                 self.contentView.snp.remakeConstraints { make in
+300 |                     make.edges.width.equalToSuperview()
+    |                                      `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+301 |                     make.bottom.equalTo(self.songsStack.snp.bottom).offset(20)
+302 |                 }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:301:69: warning: result of call to 'offset' is unused [#no-usage]
+299 |                 self.contentView.snp.remakeConstraints { make in
+300 |                     make.edges.width.equalToSuperview()
+301 |                     make.bottom.equalTo(self.songsStack.snp.bottom).offset(20)
+    |                                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+302 |                 }
+303 |             } else {
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:305:38: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+303 |             } else {
+304 |                 self.contentView.snp.remakeConstraints { make in
+305 |                     make.edges.width.equalToSuperview()
+    |                                      `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+306 |                     make.bottom.equalTo(self.footerView.snp.bottom).offset(30)
+307 |                 }
+
+MusicAsia/Sources/Features/Song/Controllers/SongViewController.swift:306:69: warning: result of call to 'offset' is unused [#no-usage]
+304 |                 self.contentView.snp.remakeConstraints { make in
+305 |                     make.edges.width.equalToSuperview()
+306 |                     make.bottom.equalTo(self.footerView.snp.bottom).offset(30)
+    |                                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+307 |                 }
+308 |             }
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:74:24: warning: result of call to 'equalTo' is unused [#no-usage]
+ 72 |         view.addSubview(scrollView)
+ 73 |         scrollView.snp.makeConstraints { make in
+ 74 |             make.edges.equalTo(view.safeAreaLayoutGuide)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+ 75 |         }
+ 76 |         
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:83:30: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 81 |         scrollView.addSubview(contentView)
+ 82 |         contentView.snp.makeConstraints { make in
+ 83 |             make.edges.width.equalToSuperview()
+    |                              `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 84 |         }
+ 85 |         
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:100:24: warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+ 98 |         view.insertSubview(backgroundImageView, at: 0)
+ 99 |         backgroundImageView.snp.makeConstraints { make in
+100 |             make.edges.equalToSuperview()
+    |                        `- warning: result of call to 'equalToSuperview()' is unused [#no-usage]
+101 |         }
+102 |     }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:115:25: error: value of type 'ConstraintMaker' has no member 'greaterThanOrEqualTo'
+113 |             make.top.equalToSuperview().offset(20)
+114 |             make.left.right.equalToSuperview().inset(15)
+115 |             make.height.greaterThanOrEqualTo(UIScreen.main.bounds.height * 0.8)
+    |                         `- error: value of type 'ConstraintMaker' has no member 'greaterThanOrEqualTo'
+116 |             make.bottom.equalToSuperview().offset(-20)
+117 |         }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:135:41: warning: result of call to 'offset' is unused [#no-usage]
+133 |         cardView.addSubview(tabStack)
+134 |         tabStack.snp.makeConstraints { make in
+135 |             make.top.equalToSuperview().offset(20)
+    |                                         `- warning: result of call to 'offset' is unused [#no-usage]
+136 |             make.left.equalToSuperview().offset(20)
+137 |         }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:136:42: warning: result of call to 'offset' is unused [#no-usage]
+134 |         tabStack.snp.makeConstraints { make in
+135 |             make.top.equalToSuperview().offset(20)
+136 |             make.left.equalToSuperview().offset(20)
+    |                                          `- warning: result of call to 'offset' is unused [#no-usage]
+137 |         }
+138 |         
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:141:69: warning: result of call to 'offset' is unused [#no-usage]
+139 |         cardView.addSubview(tabIndicator)
+140 |         tabIndicator.snp.makeConstraints { make in
+141 |             make.top.equalTo(personalTabBtn.titleLabel!.snp.bottom).offset(2)
+    |                                                                     `- warning: result of call to 'offset' is unused [#no-usage]
+142 |             make.height.equalTo(2)
+143 |             make.width.equalTo(40)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:142:25: warning: result of call to 'equalTo' is unused [#no-usage]
+140 |         tabIndicator.snp.makeConstraints { make in
+141 |             make.top.equalTo(personalTabBtn.titleLabel!.snp.bottom).offset(2)
+142 |             make.height.equalTo(2)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+143 |             make.width.equalTo(40)
+144 |             make.left.equalTo(personalTabBtn)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:143:24: warning: result of call to 'equalTo' is unused [#no-usage]
+141 |             make.top.equalTo(personalTabBtn.titleLabel!.snp.bottom).offset(2)
+142 |             make.height.equalTo(2)
+143 |             make.width.equalTo(40)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+144 |             make.left.equalTo(personalTabBtn)
+145 |         }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:144:23: warning: result of call to 'equalTo' is unused [#no-usage]
+142 |             make.height.equalTo(2)
+143 |             make.width.equalTo(40)
+144 |             make.left.equalTo(personalTabBtn)
+    |                       `- warning: result of call to 'equalTo' is unused [#no-usage]
+145 |         }
+146 |         
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:152:48: warning: result of call to 'offset' is unused [#no-usage]
+150 |         contentView.addSubview(recordImageView)
+151 |         recordImageView.snp.makeConstraints { make in
+152 |             make.top.equalTo(cardView.snp.top).offset(-20) 
+    |                                                `- warning: result of call to 'offset' is unused [#no-usage]
+153 |             make.right.equalTo(cardView.snp.right).offset(-20) // 向左偏移 40 (原为 +10，现为 -30)
+154 |             make.width.equalTo(80)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:153:52: warning: result of call to 'offset' is unused [#no-usage]
+151 |         recordImageView.snp.makeConstraints { make in
+152 |             make.top.equalTo(cardView.snp.top).offset(-20) 
+153 |             make.right.equalTo(cardView.snp.right).offset(-20) // 向左偏移 40 (原为 +10，现为 -30)
+    |                                                    `- warning: result of call to 'offset' is unused [#no-usage]
+154 |             make.width.equalTo(80)
+155 |             make.height.equalTo(80)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:154:24: warning: result of call to 'equalTo' is unused [#no-usage]
+152 |             make.top.equalTo(cardView.snp.top).offset(-20) 
+153 |             make.right.equalTo(cardView.snp.right).offset(-20) // 向左偏移 40 (原为 +10，现为 -30)
+154 |             make.width.equalTo(80)
+    |                        `- warning: result of call to 'equalTo' is unused [#no-usage]
+155 |             make.height.equalTo(80)
+156 |         }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:155:25: warning: result of call to 'equalTo' is unused [#no-usage]
+153 |             make.right.equalTo(cardView.snp.right).offset(-20) // 向左偏移 40 (原为 +10，现为 -30)
+154 |             make.width.equalTo(80)
+155 |             make.height.equalTo(80)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+156 |         }
+157 |     }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:167:25: warning: result of call to 'equalTo' is unused [#no-usage]
+165 |         
+166 |         bannerImageView.snp.makeConstraints { make in
+167 |             make.height.equalTo(120)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+168 |         }
+169 |     }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:196:55: warning: result of call to 'offset' is unused [#no-usage]
+194 |         
+195 |         formContainer.snp.makeConstraints { make in
+196 |             make.top.equalTo(tabIndicator.snp.bottom).offset(20)
+    |                                                       `- warning: result of call to 'offset' is unused [#no-usage]
+197 |             make.left.right.equalToSuperview().inset(20)
+198 |             // 确保不会撑破卡片
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:197:48: warning: result of call to 'inset' is unused [#no-usage]
+195 |         formContainer.snp.makeConstraints { make in
+196 |             make.top.equalTo(tabIndicator.snp.bottom).offset(20)
+197 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+198 |             // 确保不会撑破卡片
+199 |             make.bottom.lessThanOrEqualTo(checkboxView.snp.top).offset(-20)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:199:65: warning: result of call to 'offset' is unused [#no-usage]
+197 |             make.left.right.equalToSuperview().inset(20)
+198 |             // 确保不会撑破卡片
+199 |             make.bottom.lessThanOrEqualTo(checkboxView.snp.top).offset(-20)
+    |                                                                 `- warning: result of call to 'offset' is unused [#no-usage]
+200 |         }
+201 |         
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:205:44: warning: result of call to 'offset' is unused [#no-usage]
+203 |         registerButton.customCornerRadius = 20
+204 |         registerButton.snp.makeConstraints { make in
+205 |             make.bottom.equalToSuperview().offset(-20)
+    |                                            `- warning: result of call to 'offset' is unused [#no-usage]
+206 |             make.left.right.equalToSuperview().inset(20)
+207 |             make.height.equalTo(40)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:206:48: warning: result of call to 'inset' is unused [#no-usage]
+204 |         registerButton.snp.makeConstraints { make in
+205 |             make.bottom.equalToSuperview().offset(-20)
+206 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+207 |             make.height.equalTo(40)
+208 |         }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:207:25: warning: result of call to 'equalTo' is unused [#no-usage]
+205 |             make.bottom.equalToSuperview().offset(-20)
+206 |             make.left.right.equalToSuperview().inset(20)
+207 |             make.height.equalTo(40)
+    |                         `- warning: result of call to 'equalTo' is unused [#no-usage]
+208 |         }
+209 |         
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:211:57: warning: result of call to 'offset' is unused [#no-usage]
+209 |         
+210 |         checkboxView.snp.makeConstraints { make in
+211 |             make.bottom.equalTo(registerButton.snp.top).offset(-20)
+    |                                                         `- warning: result of call to 'offset' is unused [#no-usage]
+212 |             make.left.right.equalToSuperview().inset(20)
+213 |         }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:212:48: warning: result of call to 'inset' is unused [#no-usage]
+210 |         checkboxView.snp.makeConstraints { make in
+211 |             make.bottom.equalTo(registerButton.snp.top).offset(-20)
+212 |             make.left.right.equalToSuperview().inset(20)
+    |                                                `- warning: result of call to 'inset' is unused [#no-usage]
+213 |         }
+214 |     }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:232:50: warning: 'windows' was deprecated in iOS 15.0: Use UIWindowScene.windows on a relevant window scene instead [#DeprecatedDeclaration]
+230 |             
+231 |             let picker = RegionPickerView()
+232 |             if let window = UIApplication.shared.windows.first {
+    |                                                  `- warning: 'windows' was deprecated in iOS 15.0: Use UIWindowScene.windows on a relevant window scene instead [#DeprecatedDeclaration]
+233 |                 picker.show(in: window)
+234 |             } else if let view = self?.view {
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:280:68: warning: result of call to 'offset' is unused [#no-usage]
+278 |             self.tabIndicator.snp.remakeConstraints { make in
+279 |                 let targetBtn = isPersonal ? self.personalTabBtn : self.businessTabBtn
+280 |                 make.top.equalTo(targetBtn.titleLabel!.snp.bottom).offset(2)
+    |                                                                    `- warning: result of call to 'offset' is unused [#no-usage]
+281 |                 make.height.equalTo(2)
+282 |                 make.width.equalTo(40)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:281:29: warning: result of call to 'equalTo' is unused [#no-usage]
+279 |                 let targetBtn = isPersonal ? self.personalTabBtn : self.businessTabBtn
+280 |                 make.top.equalTo(targetBtn.titleLabel!.snp.bottom).offset(2)
+281 |                 make.height.equalTo(2)
+    |                             `- warning: result of call to 'equalTo' is unused [#no-usage]
+282 |                 make.width.equalTo(40)
+283 |                 make.left.equalTo(targetBtn)
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:282:28: warning: result of call to 'equalTo' is unused [#no-usage]
+280 |                 make.top.equalTo(targetBtn.titleLabel!.snp.bottom).offset(2)
+281 |                 make.height.equalTo(2)
+282 |                 make.width.equalTo(40)
+    |                            `- warning: result of call to 'equalTo' is unused [#no-usage]
+283 |                 make.left.equalTo(targetBtn)
+284 |             }
+
+MusicAsia/Sources/Features/Register/Controllers/RegisterViewController.swift:283:27: warning: result of call to 'equalTo' is unused [#no-usage]
+281 |                 make.height.equalTo(2)
+282 |                 make.width.equalTo(40)
+283 |                 make.left.equalTo(targetBtn)
+    |                           `- warning: result of call to 'equalTo' is unused [#no-usage]
+284 |             }
+285 |             self.view.layoutIfNeeded()
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>

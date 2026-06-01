@@ -1,0 +1,103 @@
+import Foundation
+
+struct PhoneOrderResp: Decodable {
+    let voList: [PhoneOrderVO]?
+}
+
+struct PhoneOrderVO: Decodable {
+    let orderId: Int?
+    let orderCode: String?
+    let createTime: String?
+    let setMenuImg: String?
+    let setMenuName: String?
+    let setMenuType: String?
+    let codeVOS: [ActivationCodeVO]?
+}
+
+struct ActivationCodeVO: Decodable {
+    let activationCodeId: Int?
+    let changBaCode: String?
+    let lianTongCode: String?
+}
+
+struct AppSetMenuResp: Decodable {
+    var voList: [AppSetMenuVO]?
+    
+    init(from decoder: Decoder) throws {
+        do {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            voList = try container.decodeIfPresent([AppSetMenuVO].self, forKey: .voList)
+        } catch {
+            let container = try decoder.singleValueContainer()
+            voList = try container.decode([AppSetMenuVO].self)
+        }
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case voList
+    }
+}
+
+struct AppSetMenuVO: Decodable {
+    let setMenuId: AnyDecodableValueStr?
+    let setMenuName: AnyDecodableValueStr?
+    let nowPrice: AnyDecodableValueStr?
+    let originPrice: AnyDecodableValueStr?
+    let customerDescription: AnyDecodableValueStr?
+    let content: AnyDecodableValueStr?
+    let activationCodeNumber: AnyDecodableValueStr?
+    let setMenuYear: AnyDecodableValueStr?
+    let timeType: AnyDecodableValueStr?
+}
+
+struct AnyDecodableValueStr: Decodable {
+    var value: String
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let str = try? container.decode(String.self) {
+            value = str
+        } else if let intVal = try? container.decode(Int.self) {
+            value = String(intVal)
+        } else if let doubleVal = try? container.decode(Double.self) {
+            value = String(doubleVal)
+        } else if let boolVal = try? container.decode(Bool.self) {
+            value = boolVal ? "1" : "0"
+        } else {
+            value = "0"
+        }
+    }
+}
+
+struct PlaceOrderReq: Encodable {
+    let setMenuId: Int
+}
+
+class OrderAPI {
+    
+    // 获取订单分页列表
+    static func getOrders(pageNum: Int, pageSize: Int, completion: @escaping (Result<BasePageResponse<PhoneOrderResp>, NetworkError>) -> Void) {
+        let params: [String: Any] = ["pageNum": pageNum, "pageSize": pageSize]
+        NetworkManager.shared.requestPage(APIService.Order.page, method: .get, parameters: params, completion: completion)
+    }
+    
+    // 获取套餐列表
+    static func getMenuList(dictValue: String? = nil, completion: @escaping (Result<BaseResponse<AppSetMenuResp>, NetworkError>) -> Void) {
+        var params: [String: Any] = [:]
+        if let val = dictValue { params["dictValue"] = val }
+        NetworkManager.shared.request(APIService.Order.menuList, method: .get, parameters: params, completion: completion)
+    }
+    
+    // App 下单
+    static func placeAppOrder(setMenuId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        let body = PlaceOrderReq(setMenuId: setMenuId)
+        do {
+            let data = try JSONEncoder().encode(body)
+            if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                NetworkManager.shared.request(APIService.Order.payApp, method: .post, parameters: params, completion: completion)
+            }
+        } catch {
+            completion(.failure(.decodingError))
+        }
+    }
+}
