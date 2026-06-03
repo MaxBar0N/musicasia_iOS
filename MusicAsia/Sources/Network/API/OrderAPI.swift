@@ -20,6 +20,16 @@ struct ActivationCodeVO: Decodable {
     let lianTongCode: String?
 }
 
+struct DictDataVO: Decodable {
+    let dictCode: Int?
+    let dictSort: Int?
+    let dictLabel: String?
+    let dictValue: String?
+    let dictType: String?
+    let status: String?
+    let remark: String?
+}
+
 struct AppSetMenuResp: Decodable {
     var voList: [AppSetMenuVO]?
     
@@ -82,12 +92,18 @@ class OrderAPI {
     }
     
     // 获取套餐列表
-    static func getMenuList(dictValue: String? = nil, completion: @escaping (Result<BaseResponse<AppSetMenuResp>, NetworkError>) -> Void) {
+    static func getMenuList(dictValue: String? = nil, completion: @escaping (Result<AppSetMenuResp, NetworkError>) -> Void) {
         var params: [String: Any] = [:]
         if let val = dictValue { params["dictValue"] = val }
         // 注意：/order/menu/list 如果后台没配 dictValue，可以尝试用 dictType，某些后台框架的字典接口用的是 dictType
         // 如果业务里明确是用 dictValue=APP，那可能是后台确实没数据。这里做一下兼容。
         NetworkManager.shared.request(APIService.Order.menuList, method: .get, parameters: params, completion: completion)
+    }
+    
+    // 获取字典
+    static func getDictData(dictType: String, completion: @escaping (Result<[DictDataVO], NetworkError>) -> Void) {
+        let path = APIService.System.dictData + "/\(dictType)"
+        NetworkManager.shared.request(path, method: .get, parameters: nil, completion: completion)
     }
     
     // App 下单

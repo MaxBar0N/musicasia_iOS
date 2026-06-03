@@ -4,15 +4,15 @@ struct PackageCategory {
     let id: String
     let name: String
     let desc: String
-    let packages: [PackageItem]
+    var packages: [PackageItem]
     let benefits: [PackageBenefit]
 }
 
 struct PackageItem {
     let id: String
     let name: String
-    let price: Int
-    let originalPrice: Int
+    let price: Double
+    let originalPrice: Double
     let durationInDays: Int
     let isTrial: Bool
     let activationCodeCount: Int
@@ -23,7 +23,7 @@ struct PackageItem {
 struct PackageBenefit {
     let name: String
     let desc: String?
-    let price: Int?
+    let price: Double?
 }
 
 struct OrderRecord {

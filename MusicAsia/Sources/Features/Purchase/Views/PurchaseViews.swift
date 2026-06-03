@@ -3,6 +3,7 @@ import SnapKit
 
 class PackageItemCell: UICollectionViewCell {
     
+    private let bgImageView = UIImageView()
     private let titleLabel = UILabel()
     private let priceLabel = UILabel()
     private let originalPriceLabel = UILabel()
@@ -19,9 +20,18 @@ class PackageItemCell: UICollectionViewCell {
         
         contentView.layer.cornerRadius = 12
         contentView.layer.borderWidth = 1.5
+        contentView.layer.masksToBounds = true
         
-        titleLabel.font = .systemFont(ofSize: 14)
-        titleLabel.textAlignment = .center
+        bgImageView.image = UIImage(named: "combo_item_background_image")
+        bgImageView.contentMode = .scaleToFill
+        contentView.addSubview(bgImageView)
+        
+        bgImageView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        titleLabel.font = .systemFont(ofSize: 12)
+        titleLabel.textAlignment = .left
         contentView.addSubview(titleLabel)
         
         priceLabel.font = .systemFont(ofSize: 24, weight: .bold)
@@ -32,30 +42,20 @@ class PackageItemCell: UICollectionViewCell {
         originalPriceLabel.textAlignment = .center
         contentView.addSubview(originalPriceLabel)
         
-        // 钻石图标（设计稿中有个小钻石）
-        diamondIcon.image = UIImage(systemName: "diamond.fill")
-        diamondIcon.contentMode = .scaleAspectFit
-        contentView.addSubview(diamondIcon)
-        
         titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(15)
-            make.centerX.equalToSuperview()
+            make.top.equalToSuperview().offset(13)
+            make.left.equalToSuperview().offset(6)
+            make.right.equalToSuperview().offset(-5)
         }
         
         priceLabel.snp.makeConstraints { make in
-            make.centerY.equalToSuperview()
+            make.top.equalTo(titleLabel.snp.bottom).offset(12)
             make.centerX.equalToSuperview()
         }
         
         originalPriceLabel.snp.makeConstraints { make in
             make.top.equalTo(priceLabel.snp.bottom).offset(5)
             make.centerX.equalToSuperview()
-        }
-        
-        diamondIcon.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-10)
-            make.centerX.equalToSuperview()
-            make.width.height.equalTo(20)
         }
         
         updateStyle()
@@ -65,13 +65,13 @@ class PackageItemCell: UICollectionViewCell {
         titleLabel.text = item.name
         
         let priceStr = NSMutableAttributedString(string: "¥", attributes: [.font: UIFont.systemFont(ofSize: 14)])
-        priceStr.append(NSAttributedString(string: "\(item.price)"))
+        priceStr.append(NSAttributedString(string: String(format: "%.2f", item.price).replacingOccurrences(of: ".00", with: "")))
         priceLabel.attributedText = priceStr
         
         let original = item.originalPrice
         if original > item.price {
             let attrStr = NSAttributedString(
-                string: "¥\(original)",
+                string: "¥" + String(format: "%.2f", original).replacingOccurrences(of: ".00", with: ""),
                 attributes: [
                     .strikethroughStyle: NSUnderlineStyle.single.rawValue,
                     .foregroundColor: UIColor.white.withAlphaComponent(0.5)
@@ -85,18 +85,19 @@ class PackageItemCell: UICollectionViewCell {
     }
     
     private func updateStyle() {
+        // 背景图一直显示
+        bgImageView.isHidden = false
+        
         if isSelected {
-            contentView.backgroundColor = UIColor.white.withAlphaComponent(0.2)
+            contentView.backgroundColor = .clear
             contentView.layer.borderColor = UIColor(hex: "#16E0BF").cgColor
             titleLabel.textColor = .white
             priceLabel.textColor = .white
-            diamondIcon.tintColor = UIColor(hex: "#16E0BF")
         } else {
             contentView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
-            contentView.layer.borderColor = UIColor.white.withAlphaComponent(0.2).cgColor
+            contentView.layer.borderColor = UIColor.clear.cgColor // 未选中时去掉边框
             titleLabel.textColor = UIColor.white.withAlphaComponent(0.8)
             priceLabel.textColor = UIColor.white.withAlphaComponent(0.8)
-            diamondIcon.tintColor = UIColor.white.withAlphaComponent(0.2)
         }
     }
     
@@ -137,7 +138,7 @@ class BenefitRowView: UIView {
         
         if let price = benefit.price {
             let priceLabel = UILabel()
-            priceLabel.text = "\(price)元"
+            priceLabel.text = "\(String(format: "%.2f", price).replacingOccurrences(of: ".00", with: ""))元"
             priceLabel.textColor = UIColor.white.withAlphaComponent(0.9)
             priceLabel.font = .systemFont(ofSize: 14)
             addSubview(priceLabel)

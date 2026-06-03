@@ -401,6 +401,7 @@ class RegisterViewController: BaseViewController {
         }
         
         var body = PhoneRegisterBody(phone: phone, code: code, registerType: isPersonalMode ? "PERSON" : "BUSINESS")
+        UserDefaults.standard.set(body.registerType, forKey: "UserRegisterType") // 缓存给购买套餐分类使用
         
         if isPersonalMode {
             // A2、生成个人用户信息

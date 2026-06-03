@@ -53,4 +53,8 @@ struct APIService {
         static let payApp = "/phone/order/pay/app"
         static let checkPayment = "/phone/order/checkPayment"
     }
+    
+    struct System {
+        static let dictData = "/system/dict/data/type"
+    }
 }

@@ -16,7 +16,7 @@ class PurchaseViewController: BaseViewController {
     private var collectionView: UICollectionView!
     
     private let wechatPayView = UIView()
-    private let agreementView = AgreementCheckboxView(text: "购买代表同意并接受 ", linkText: "《会员服务协议》和《自动续费服务协议》")
+    private let agreementView = AgreementCheckboxView(text: "购买代表同意并接受 ", linkText: "《平台交易规则》")
     private let payButton = GradientButton()
     
     private let bottomCardView = UIView()
@@ -42,31 +42,63 @@ class PurchaseViewController: BaseViewController {
     }
     
     private func loadData() {
-        // 先用假数据进行展示，因为后台接口返回的数据是空的 `voList: []`
-        let dummyPkgs = [
-            PackageItem(id: "1", name: "1年VIP套餐", price: 199, originalPrice: 299, durationInDays: 365, isTrial: false, activationCodeCount: 1, benefits: ["海量曲库免费听", "专属身份标识", "无损音质下载"], customerDesc: "适合个人用户长期使用"),
-            PackageItem(id: "2", name: "2年VIP套餐", price: 299, originalPrice: 499, durationInDays: 730, isTrial: false, activationCodeCount: 1, benefits: ["海量曲库免费听", "专属身份标识", "无损音质下载", "多设备同时在线"], customerDesc: "性价比极高，推荐购买")
-        ]
+        // 先获取套餐分类字典 user_menu_type
+        OrderAPI.getDictData(dictType: "user_menu_type") { [weak self] dictResult in
+            guard let self = self else { return }
+            
+            var dictCategories: [PackageCategory] = []
+            
+            switch dictResult {
+            case .success(let dictList):
+                let userType = UserDefaults.standard.string(forKey: "UserRegisterType") ?? "PERSON"
+                
+                for dict in dictList {
+                    guard let label = dict.dictLabel, let value = dict.dictValue else { continue }
+                    
+                    // 匹配当前账号类型：如果是 PERSON 只能看 PERSON；如果是 BUSINESS 则看 BUSINESS 相关的
+                    if userType == "PERSON" && value != "PERSON" { continue }
+                    if userType == "BUSINESS" && !value.hasPrefix("BUSINESS") { continue }
+                    
+                    let desc = dict.remark ?? "专属套餐"
+                    dictCategories.append(PackageCategory(id: value, name: label, desc: desc, packages: [], benefits: []))
+                }
+            case .failure(let error):
+                print("获取套餐分类字典失败: \(error)")
+            }
+            
+            if dictCategories.isEmpty {
+                // 如果字典为空或者过滤后为空，塞一个默认的
+                dictCategories.append(PackageCategory(id: "APP", name: "APP套餐", desc: "所有套餐", packages: [], benefits: []))
+            }
+            
+            self.categories = dictCategories
+            DispatchQueue.main.async {
+                self.setupCategoryButtons()
+                self.loadPackagesForCurrentCategory()
+            }
+        }
+    }
+    
+    private func loadPackagesForCurrentCategory() {
+        guard !categories.isEmpty, currentCategoryIndex < categories.count else { return }
         
-        let defaultCategory = PackageCategory(id: "1", name: "所有套餐", desc: "全部可用套餐", packages: dummyPkgs, benefits: [])
-        self.categories = [defaultCategory]
+        let currentCat = categories[currentCategoryIndex]
+        // 如果已经加载过了，就不重复加载
+        if !currentCat.packages.isEmpty {
+            self.updateUIForCurrentSelection()
+            return
+        }
         
-        self.setupCategoryButtons()
-        self.updateUIForCurrentSelection()
-        self.collectionView.reloadData()
-        return
-        // --- 假数据注入结束 ---
+        let dictValue = currentCat.id
         
-        OrderAPI.getMenuList(dictValue: nil) { [weak self] result in
+        OrderAPI.getMenuList(dictValue: dictValue) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let response):
-                let list = response.data?.voList ?? []
-                
-                // 根据业务规则，将接口返回的扁平化套餐数据转换为带分类（个人/商业）和具体内容的展示模型
+                let list = response.voList ?? []
                 var pkgs: [PackageItem] = []
+                
                 for vo in list {
-                    // 从 timeType 和 setMenuYear 解析天数
                     var days = 365
                     if let type = vo.timeType?.value, type == "DAY", let yearStr = vo.setMenuYear?.value, let dayCount = Int(yearStr) {
                         days = dayCount
@@ -75,35 +107,36 @@ class PurchaseViewController: BaseViewController {
                     }
                     
                     let actCount = Int(vo.activationCodeNumber?.value ?? "1") ?? 1
-                    // 根据命名或描述简单判断是否为试用套餐
                     let isTrial = (vo.setMenuName?.value.contains("试用") == true)
-                    
-                    // 将 content 字符串按换行或特定符号分割为特权列表
                     let benefitsList = vo.content?.value.components(separatedBy: .newlines).filter { !$0.isEmpty } ?? []
                     
                     let item = PackageItem(id: vo.setMenuId?.value ?? "0",
-                                           name: vo.setMenuName?.value ?? "套餐",
-                                           price: Int(Double(vo.nowPrice?.value ?? "0") ?? 0),
-                                           originalPrice: Int(Double(vo.originPrice?.value ?? "0") ?? 0),
+                                           name: vo.setMenuName?.value ?? "未知套餐",
+                                           price: Double(vo.nowPrice?.value ?? "0") ?? 0,
+                                           originalPrice: Double(vo.originPrice?.value ?? "0") ?? 0,
                                            durationInDays: days,
                                            isTrial: isTrial,
                                            activationCodeCount: actCount,
                                            benefits: benefitsList,
-                                           customerDesc: vo.customerDescription?.value)
+                                           customerDesc: vo.customerDescription?.value ?? "")
+                    
                     pkgs.append(item)
                 }
                 
-                // 将数据统一放入一个“所有套餐”分类中（如果后端后续加了字典 dictValue，可在这里进一步拆分 categories）
-                let defaultCategory = PackageCategory(id: "1", name: "所有套餐", desc: "全部可用套餐", packages: pkgs, benefits: [])
-                self.categories = [defaultCategory]
+                self.categories[self.currentCategoryIndex].packages = pkgs
+                self.currentPackageIndex = 0
                 
-                // 由于数据是异步返回的，我们需要重新清空并渲染顶部 Category 按钮
-                self.setupCategoryButtons()
-                self.updateUIForCurrentSelection()
-                self.collectionView.reloadData()
+                DispatchQueue.main.async {
+                    self.updateUIForCurrentSelection()
+                }
                 
             case .failure(let error):
-                self.showAlert(message: "获取套餐失败: \(error.localizedDescription)")
+                print("获取套餐列表失败: \(error)")
+                self.categories[self.currentCategoryIndex].packages = []
+                self.currentPackageIndex = 0
+                DispatchQueue.main.async {
+                    self.updateUIForCurrentSelection()
+                }
             }
         }
     }
@@ -216,8 +249,8 @@ class PurchaseViewController: BaseViewController {
         wechatPayView.layer.cornerRadius = 8
         topCardView.addSubview(wechatPayView)
         
-        let wxIcon = UIImageView(image: UIImage(systemName: "message.fill"))
-        wxIcon.tintColor = .green
+        let wxIcon = UIImageView(image: UIImage(named: "wechat_pay_logo"))
+        wxIcon.contentMode = .scaleAspectFit
         wechatPayView.addSubview(wxIcon)
         
         let wxLabel = UILabel()
@@ -237,6 +270,7 @@ class PurchaseViewController: BaseViewController {
         wxIcon.snp.makeConstraints { make in
             make.left.equalToSuperview().offset(15)
             make.centerY.equalToSuperview()
+            make.width.height.equalTo(24) // 限制下微信logo的尺寸
         }
         wxLabel.snp.makeConstraints { make in
             make.left.equalTo(wxIcon.snp.right).offset(10)
@@ -324,7 +358,7 @@ class PurchaseViewController: BaseViewController {
     @objc private func categoryTapped(_ sender: UIButton) {
         currentCategoryIndex = sender.tag
         currentPackageIndex = 0
-        updateUIForCurrentSelection()
+        loadPackagesForCurrentCategory()
     }
     
     private func updateUIForCurrentSelection() {
@@ -407,9 +441,9 @@ class PurchaseViewController: BaseViewController {
         
         let pkg = category.packages[currentPackageIndex]
         
-        // 试用套餐重复购买拦截校验
+        // C1、试用套餐重复购买拦截校验
         if pkg.isTrial {
-            // 这里应该调用后台接口校验，目前暂用 UserDefaults 模拟本地已购记录
+            // TODO: 这里应根据后台接口或订单列表校验，暂用 UserDefaults 模拟本地已购记录
             let trialPurchasedKey = "HasPurchasedTrial_\(pkg.id)"
             if UserDefaults.standard.bool(forKey: trialPurchasedKey) {
                 showAlert(message: "试用套餐每个账号只能购买一次，请购买其他的套餐，谢谢")
@@ -418,10 +452,9 @@ class PurchaseViewController: BaseViewController {
             UserDefaults.standard.set(true, forKey: trialPurchasedKey)
         }
         
-        // 发起支付前先调后台下单接口
+        // C2、发起支付前先调后台下单接口
         guard let setMenuId = Int(pkg.id) else { return }
         
-        // 显示一个 loading 状态
         let loadingAlert = UIAlertController(title: "正在创建订单...", message: nil, preferredStyle: .alert)
         present(loadingAlert, animated: true)
         
@@ -431,9 +464,10 @@ class PurchaseViewController: BaseViewController {
                 switch result {
                 case .success(let orderInfo):
                     // 下单成功后，这里应该是唤起微信支付 SDK
-                    // 模拟支付成功流程
-                    print("后台订单创建成功，准备唤起微信支付: \(orderInfo ?? "")")
-                    self.simulateWechatPaySuccess(packageId: pkg.id)
+                    // 模拟支付成功流程 (D7: 跳转下单成功页)
+                    let orderNo = orderInfo ?? "WX_PAY_MOCK_ORDER"
+                    print("后台订单创建成功，准备唤起微信支付: \(orderNo)")
+                    self.simulateWechatPaySuccess(orderNo: orderNo)
                 case .failure(let error):
                     self.showAlert(message: "创建订单失败: \(error.localizedDescription)")
                 }
@@ -441,17 +475,11 @@ class PurchaseViewController: BaseViewController {
         }
     }
     
-    private func simulateWechatPaySuccess(packageId: String) {
-        // 模拟外部系统通过接口调用开通会员
-        PurchaseDataManager.shared.openMembership(appkey: "1234567890123456", packageId: packageId, phone: "13800000000") { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let orderNo):
-                    self?.showSuccessPopup(orderNo: orderNo)
-                case .failure(let error):
-                    self?.showAlert(message: "会员开通失败: \(error.localizedDescription)")
-                }
-            }
+    private func simulateWechatPaySuccess(orderNo: String) {
+        // 模拟微信支付成功后的回调，直接跳转成功页 (D7)
+        // 注意：D1~D6 (延长有效期、生成激活码、联通续费等) 是由后台在收到微信支付回调后处理的
+        DispatchQueue.main.async {
+            self.showSuccessPopup(orderNo: orderNo)
         }
     }
     
