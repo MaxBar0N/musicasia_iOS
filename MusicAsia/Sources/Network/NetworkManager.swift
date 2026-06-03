@@ -173,19 +173,9 @@ class NetworkManager {
                 if let data = response.data, let str = String(data: data, encoding: .utf8) {
                     print("🌐 API Response [\(endpoint)]: \(str)")
                 }
-            }
-            .responseDecodable(of: BaseResponse<T>.self) { response in
                 
-                // 1. 处理网络层错误 (如 404, 500, 断网)
                 if let error = response.error {
-                    // 尝试打印出最真实的解析失败原因
                     var errorMsg = error.localizedDescription
-                    if case let .responseSerializationFailed(reason) = error,
-                       case let .decodingFailed(decodingError) = reason {
-                        errorMsg = "解析失败: \(decodingError)"
-                        print("❌ JSON 解析严重失败: \(decodingError)")
-                    }
-                    
                     if let statusCode = response.response?.statusCode {
                         if statusCode == 401 {
                             self.handleTokenExpiration()
@@ -197,32 +187,36 @@ class NetworkManager {
                     return
                 }
                 
-                // 2. 处理业务层数据
-                guard let baseResponse = response.value else {
-                    completion(.failure(.decodingError))
+                guard let data = response.data else {
+                    completion(.failure(.noData))
                     return
                 }
                 
-                if baseResponse.code == 401 {
-                    self.handleTokenExpiration()
-                    completion(.failure(.serverError(statusCode: 401, message: "Token 已过期，请重新登录")))
-                    return
-                }
-                
-                // 3. 校验业务状态码 (如 code == 200)
-                if baseResponse.isSuccess {
-                    if let data = baseResponse.data {
-                        completion(.success(data))
-                    } else if let emptyData = Optional<Any>.none as? T {
-                        // 支持 T 为 Optional 且 JSON 中 data 为 null 或缺失的情况
-                        completion(.success(emptyData))
-                    } else if let errorMsg = baseResponse.decodingErrorMsg {
-                        completion(.failure(.serverError(statusCode: 200, message: "解析详情: \(errorMsg)")))
-                    } else {
-                        completion(.failure(.noData))
+                do {
+                    let baseResponse = try JSONDecoder().decode(BaseResponse<T>.self, from: data)
+                    
+                    if baseResponse.code == 401 {
+                        self.handleTokenExpiration()
+                        completion(.failure(.serverError(statusCode: 401, message: "Token 已过期，请重新登录")))
+                        return
                     }
-                } else {
-                    completion(.failure(.serverError(statusCode: baseResponse.code, message: baseResponse.msg ?? "未知业务错误")))
+                    
+                    if baseResponse.isSuccess {
+                        if let bizData = baseResponse.data {
+                            completion(.success(bizData))
+                        } else if let emptyData = Optional<Any>.none as? T {
+                            completion(.success(emptyData))
+                        } else if let errorMsg = baseResponse.decodingErrorMsg {
+                            completion(.failure(.serverError(statusCode: 200, message: "解析详情: \(errorMsg)")))
+                        } else {
+                            completion(.failure(.noData))
+                        }
+                    } else {
+                        completion(.failure(.serverError(statusCode: baseResponse.code, message: baseResponse.msg ?? "未知业务错误")))
+                    }
+                } catch {
+                    print("❌ JSON 手动解析失败: \(error)")
+                    completion(.failure(.decodingError))
                 }
             }
     }

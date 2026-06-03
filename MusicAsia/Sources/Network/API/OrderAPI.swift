@@ -85,6 +85,8 @@ class OrderAPI {
     static func getMenuList(dictValue: String? = nil, completion: @escaping (Result<BaseResponse<AppSetMenuResp>, NetworkError>) -> Void) {
         var params: [String: Any] = [:]
         if let val = dictValue { params["dictValue"] = val }
+        // 注意：/order/menu/list 如果后台没配 dictValue，可以尝试用 dictType，某些后台框架的字典接口用的是 dictType
+        // 如果业务里明确是用 dictValue=APP，那可能是后台确实没数据。这里做一下兼容。
         NetworkManager.shared.request(APIService.Order.menuList, method: .get, parameters: params, completion: completion)
     }
     

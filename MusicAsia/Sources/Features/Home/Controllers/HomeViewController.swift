@@ -227,61 +227,18 @@ class HomeViewController: BaseViewController {
     }
     
     private func handleSongPlay(at index: Int, song: CollectionSongsVO) {
-        // B. 演唱逻辑...
-        print("点击了播放: \(song.songName ?? "")")
-        
-        let mac = BluetoothManager.shared.currentDeviceMAC ?? ""
-        let name = "BluetoothSpeaker" // 实际应该获取当前连接蓝牙名称
-        
-        if mac.isEmpty {
-            // B1、判断是否连蓝牙，如果未连蓝牙，提示
-            self.showAlert(message: "当前设备未进行蓝牙连接，无法播放歌曲")
-            return
-        }
-        
-        // A. 蓝牙播放权限判断
-        BluetoothAPI.checkBluetooth(mac: mac, name: name) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let resp):
-                if resp.hasPermission == true {
-                    self.playSong(song: song)
-                } else {
-                    self.showAlert(message: resp.msg ?? "当前连接蓝牙设备超过可连接数量，可连接设备请查看我的蓝牙")
-                }
-            case .failure(let error):
-                self.showAlert(message: "蓝牙权限校验失败: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    private func playSong(song: CollectionSongsVO) {
-        // B2、处理播放地址
+        let songName = song.songName ?? ""
         let secret = song.songNameSecret ?? ""
         
-        if secret.hasPrefix("http") {
-            // 唱吧：直接 URL
-            let playUrl = secret.hasSuffix(".mp3") ? secret : secret + ".mp3"
-            self.showPlayer(songName: song.songName ?? "", url: playUrl)
-        } else {
-            // 联通：加密地址，需后台解密
-            SongAPI.getSongUrl(cid: secret) { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case .success(let urlStr):
-                    self.showPlayer(songName: song.songName ?? "", url: urlStr)
-                case .failure(let error):
-                    self.showAlert(message: "获取播放地址失败: \(error.localizedDescription)")
-                }
-            }
+        SongPlaybackManager.shared.playSong(
+            songName: songName,
+            songSecret: secret,
+            isDownloaded: false, // 首页未获取下载状态
+            in: self
+        ) { [weak self] in
+            // 播放成功后的 UI 状态更新（如需要）
+            print("鉴权通过，开始播放: \(songName)")
         }
-    }
-    
-    private func showPlayer(songName: String, url: String) {
-        print("准备播放歌曲: \(songName), URL: \(url)")
-        let popup = PlayerPopupView()
-        popup.configure(songName: songName)
-        popup.show(in: self.navigationController?.view ?? self.view)
     }
     
     private func handleAlbumPlay(at index: Int, album: MusicCollectionVO) {

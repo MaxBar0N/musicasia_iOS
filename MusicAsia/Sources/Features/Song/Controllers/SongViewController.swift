@@ -351,70 +351,18 @@ class SongViewController: BaseViewController {
     }
     
     private func handlePlay(at index: Int, song: Song) {
-        print("点击了播放: \(song.name)")
-        ProfileAPI.checkUserEndTime { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .success(let resp):
-                    if resp.hasPermission != true {
-                        self.showAlert(message: resp.msg ?? "会员已过期，请前往“我的”里面进行续费，谢谢")
-                        return
-                    }
-                    
-                    let mac = BluetoothManager.shared.currentDeviceMAC ?? ""
-                    let name = "BluetoothSpeaker"
-                    
-                    if mac.isEmpty {
-                        self.showAlert(message: "当前设备未进行蓝牙连接，无法播放歌曲")
-                        return
-                    }
-                    
-                    BluetoothAPI.checkBluetooth(mac: mac, name: name) { result in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(let resp):
-                                if resp.hasPermission == true {
-                                    print("有蓝牙权限，准备获取解密 URL 并播放")
-                                    self.startPlaySong(song)
-                                } else {
-                                    self.showAlert(message: resp.msg ?? "当前连接蓝牙设备超过可连接数量，可连接设备请查看我的蓝牙")
-                                }
-                            case .failure(let error):
-                                self.showAlert(message: "蓝牙权限校验失败: \(error.localizedDescription)")
-                            }
-                        }
-                    }
-                    
-                case .failure(let error):
-                    self.showAlert(message: "会员校验失败: \(error.localizedDescription)")
-                }
-            }
+        SongPlaybackManager.shared.playSong(
+            songName: song.name,
+            songSecret: song.url,
+            isDownloaded: song.isDownloaded,
+            in: self
+        ) { [weak self] in
+            // UI 更新
+            guard let self = self else { return }
+            var updatedSong = song
+            updatedSong.isPlaying = true
+            self.updateSongState(at: index, song: updatedSong)
         }
-    }
-    
-    private func startPlaySong(_ song: Song) {
-        if song.source == .unicom {
-            SongAPI.getSongUrl(cid: song.url) { [weak self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let decryptedURL):
-                        self?.showPlayerPopup(songName: song.name, url: decryptedURL)
-                    case .failure(let error):
-                        self?.showAlert(message: "解密歌曲失败: \(error.localizedDescription)")
-                    }
-                }
-            }
-        } else {
-            showPlayerPopup(songName: song.name, url: song.url)
-        }
-    }
-    
-    private func showPlayerPopup(songName: String, url: String) {
-        print("准备播放 URL: \(url)")
-        let popup = PlayerPopupView()
-        popup.configure(songName: songName)
-        popup.show(in: self.navigationController?.view ?? self.view)
     }
     
     private func updateSongState(at index: Int, song: Song) {

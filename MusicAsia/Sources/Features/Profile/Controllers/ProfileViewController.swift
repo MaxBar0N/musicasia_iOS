@@ -589,88 +589,25 @@ class ProfileViewController: BaseViewController {
             return
         }
         
-        // D1: 判断会员到期时间
-        ProfileAPI.checkUserEndTime { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .success(let resp):
-                    if resp.hasPermission != true {
-                        self.showAlert(message: resp.msg ?? "会员已过期，请前往“我的”里面进行续费，谢谢")
-                        return
-                    }
-                    
-                    // D2: 判断是否连蓝牙
-                    let mac = BluetoothManager.shared.currentDeviceMAC ?? ""
-                    let name = "BluetoothSpeaker"
-                    
-                    if mac.isEmpty {
-                        self.showAlert(message: "当前设备未进行蓝牙连接，无法播放歌曲")
-                        return
-                    }
-                    
-                    // D3: 请求后台判断蓝牙设备是否有权限播放歌曲
-                    // 暂停其他所有歌曲
-                    for i in 0..<self.displaySongs.count {
-                        self.displaySongs[i].isPlaying = false
-                        if let r = self.songsStack.arrangedSubviews[i] as? ProfileSongRowView {
-                            r.configure(with: self.displaySongs[i])
-                        }
-                    }
-                    
-                    BluetoothAPI.checkBluetooth(mac: mac, name: name) { [weak self] result in
-                        DispatchQueue.main.async {
-                            guard let self = self else { return }
-                            switch result {
-                            case .success(let resp):
-                                if resp.hasPermission == true {
-                                    // 权限验证通过，执行播放
-                                    song.isPlaying = true
-                                    self.displaySongs[index] = song
-                                    if let row = self.songsStack.arrangedSubviews[index] as? ProfileSongRowView {
-                                        row.configure(with: song)
-                                    }
-                                    
-                                    // D4: 判断此歌曲是否已下载
-                                    if song.isDownloaded {
-                                        print("💿 播放本地下载文件: \(song.name)")
-                                        // 模拟本地播放
-                                        return
-                                    }
-                                    
-                                    if song.source == .changba {
-                                        print("▶️ 播放唱吧直链: \(song.url)")
-                                        if let url = URL(string: song.url) {
-                                            AudioPlayerManager.shared.play(url: url)
-                                        }
-                                    } else {
-                                        print("⏳ 请求后台解密联通 URL...")
-                                        SongAPI.getSongUrl(cid: song.url) { [weak self] decryptResult in
-                                            DispatchQueue.main.async {
-                                                switch decryptResult {
-                                                case .success(let decryptedUrlStr):
-                                                    print("▶️ 播放解密后的联通链接: \(decryptedUrlStr)")
-                                                    if let url = URL(string: decryptedUrlStr) {
-                                                        AudioPlayerManager.shared.play(url: url)
-                                                    }
-                                                case .failure(let error):
-                                                    self?.showAlert(message: "解密歌曲失败: \(error.localizedDescription)")
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    self.showAlert(message: resp.msg ?? "当前连接蓝牙设备超过可连接数量，可连接设备请查看我的蓝牙")
-                                }
-                            case .failure(let error):
-                                self.showAlert(message: "蓝牙权限校验失败: \(error.localizedDescription)")
-                            }
-                        }
-                    }
-                    
-                case .failure(let error):
-                    self.showAlert(message: "会员校验失败: \(error.localizedDescription)")
+        SongPlaybackManager.shared.playSong(
+            songName: song.name,
+            songSecret: song.url,
+            isDownloaded: song.isDownloaded,
+            in: self
+        ) { [weak self] in
+            guard let self = self else { return }
+            // 暂停其他所有歌曲
+            for i in 0..<self.displaySongs.count {
+                self.displaySongs[i].isPlaying = false
+                if let r = self.songsStack.arrangedSubviews[i] as? ProfileSongRowView {
+                    r.configure(with: self.displaySongs[i])
                 }
+            }
+            // 权限验证通过，执行播放
+            song.isPlaying = true
+            self.displaySongs[index] = song
+            if let row = self.songsStack.arrangedSubviews[index] as? ProfileSongRowView {
+                row.configure(with: song)
             }
         }
     }

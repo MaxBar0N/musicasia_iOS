@@ -31,8 +31,8 @@ class PurchaseViewController: BaseViewController {
         super.viewDidLoad()
         title = "购买套餐"
         
-        loadData()
         setupUI()
+        loadData()
         updateUIForCurrentSelection()
     }
     
@@ -42,7 +42,22 @@ class PurchaseViewController: BaseViewController {
     }
     
     private func loadData() {
-        OrderAPI.getMenuList { [weak self] result in
+        // 先用假数据进行展示，因为后台接口返回的数据是空的 `voList: []`
+        let dummyPkgs = [
+            PackageItem(id: "1", name: "1年VIP套餐", price: 199, originalPrice: 299, durationInDays: 365, isTrial: false, activationCodeCount: 1, benefits: ["海量曲库免费听", "专属身份标识", "无损音质下载"], customerDesc: "适合个人用户长期使用"),
+            PackageItem(id: "2", name: "2年VIP套餐", price: 299, originalPrice: 499, durationInDays: 730, isTrial: false, activationCodeCount: 1, benefits: ["海量曲库免费听", "专属身份标识", "无损音质下载", "多设备同时在线"], customerDesc: "性价比极高，推荐购买")
+        ]
+        
+        let defaultCategory = PackageCategory(id: "1", name: "所有套餐", desc: "全部可用套餐", packages: dummyPkgs, benefits: [])
+        self.categories = [defaultCategory]
+        
+        self.setupCategoryButtons()
+        self.updateUIForCurrentSelection()
+        self.collectionView.reloadData()
+        return
+        // --- 假数据注入结束 ---
+        
+        OrderAPI.getMenuList(dictValue: nil) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let response):
@@ -292,6 +307,8 @@ class PurchaseViewController: BaseViewController {
     
     private func updateIndicatorPosition() {
         guard !categoryButtons.isEmpty, currentCategoryIndex < categoryButtons.count else { return }
+        guard categoryIndicator.superview != nil else { return } // 保护
+        
         categoryIndicator.snp.remakeConstraints { make in
             make.top.equalTo(categoryStackView.snp.bottom).offset(5)
             make.height.equalTo(2)
@@ -321,11 +338,13 @@ class PurchaseViewController: BaseViewController {
             btn.titleLabel?.font = isSelected ? .systemFont(ofSize: 22, weight: .bold) : .systemFont(ofSize: 16, weight: .regular)
         }
         
-        categoryIndicator.snp.remakeConstraints { make in
-            make.top.equalTo(categoryStackView.snp.bottom).offset(5)
-            make.height.equalTo(2)
-            make.width.equalTo(30)
-            make.centerX.equalTo(categoryButtons[currentCategoryIndex])
+        if categoryIndicator.superview != nil {
+            categoryIndicator.snp.remakeConstraints { make in
+                make.top.equalTo(categoryStackView.snp.bottom).offset(5)
+                make.height.equalTo(2)
+                make.width.equalTo(30)
+                make.centerX.equalTo(categoryButtons[currentCategoryIndex])
+            }
         }
         
         collectionView.reloadData()
