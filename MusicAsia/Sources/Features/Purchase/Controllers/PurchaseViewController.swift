@@ -44,7 +44,6 @@ class PurchaseViewController: BaseViewController {
     
     private func loadData() {
         showLoading()
-        // 先获取套餐分类字典 user_menu_type
         OrderAPI.getDictData(dictType: "user_menu_type") { [weak self] dictResult in
             guard let self = self else { return }
             self.hideLoading()
@@ -58,7 +57,6 @@ class PurchaseViewController: BaseViewController {
                 for dict in dictList {
                     guard let label = dict.dictLabel, let value = dict.dictValue else { continue }
                     
-                    // 匹配当前账号类型：如果是 PERSON 只能看 PERSON；如果是 BUSINESS 则看 BUSINESS 相关的
                     if userType == "PERSON" && value != "PERSON" { continue }
                     if userType == "BUSINESS" && !value.hasPrefix("BUSINESS") { continue }
                     
@@ -70,7 +68,6 @@ class PurchaseViewController: BaseViewController {
             }
             
             if dictCategories.isEmpty {
-                // 如果字典为空或者过滤后为空，塞一个默认的
                 dictCategories.append(PackageCategory(id: "APP", name: "APP套餐", desc: "所有套餐", packages: [], benefits: []))
             }
             
@@ -86,7 +83,6 @@ class PurchaseViewController: BaseViewController {
         guard !categories.isEmpty, currentCategoryIndex < categories.count else { return }
         
         let currentCat = categories[currentCategoryIndex]
-        // 如果已经加载过了，就不重复加载
         if !currentCat.packages.isEmpty {
             self.updateUIForCurrentSelection()
             return
@@ -148,7 +144,6 @@ class PurchaseViewController: BaseViewController {
     }
     
     private func setupCategoryButtons() {
-        // 清空原有的按钮
         categoryButtons.forEach { $0.removeFromSuperview() }
         categoryButtons.removeAll()
         
@@ -415,7 +410,6 @@ class PurchaseViewController: BaseViewController {
         
         let package = category.packages[currentPackageIndex]
         
-        // 动态更新客户说明
         if let desc = package.customerDesc, !desc.isEmpty {
             descLabel.text = "   " + desc
             descLabel.isHidden = false
@@ -424,7 +418,6 @@ class PurchaseViewController: BaseViewController {
             descLabel.isHidden = false
         }
         
-        // 动态更新特权
         benefitsStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let currentBenefits = package.benefits.isEmpty ? category.benefits : package.benefits.map { PackageBenefit(name: $0, desc: nil, price: nil) }
         for benefit in currentBenefits {
@@ -464,7 +457,6 @@ class PurchaseViewController: BaseViewController {
         OrderAPI.placeH5Order(setMenuId: setMenuId) { [weak self] result in
             guard let self = self else { return }
             
-            // 确保所有的 UI 弹出和关闭操作都在主线程执行，防止卡顿和延迟
             DispatchQueue.main.async {
                 switch result {
                 case .success(let orderInfo):
@@ -480,11 +472,7 @@ class PurchaseViewController: BaseViewController {
                         let nav = UINavigationController(rootViewController: webVC)
                         nav.modalPresentationStyle = .fullScreen
                         
-                        // 由于 iOS 限制不能在有 present 的情况下再次 present
-                        // 我们让当前的 loadingAlert 主动去 present 新的 WebView 页面
                         loadingAlert.present(nav, animated: true) {
-                            // 可选：在新页面完全展示后，其实不需要手动 dismiss alert
-                            // 因为当用户关闭 webVC 时，我们可以顺带把底层 alert 一起关掉
                         }
                     } else {
                         loadingAlert.dismiss(animated: true) {
@@ -531,8 +519,6 @@ class PurchaseViewController: BaseViewController {
     }
     
     private func simulateWechatPaySuccess(orderNo: String) {
-        // 模拟微信支付成功后的回调，直接跳转成功页 (D7)
-        // 注意：D1~D6 (延长有效期、生成激活码、联通续费等) 是由后台在收到微信支付回调后处理的
         DispatchQueue.main.async {
             self.showSuccessPopup(orderNo: orderNo)
         }
@@ -591,7 +577,6 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "支付订单"
-        // BaseViewController 已经处理了渐变背景，这里将 webView 背景透明即可
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "关闭", style: .plain, target: self, action: #selector(closeTapped))
 
@@ -599,7 +584,6 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
         webView = WKWebView(frame: view.bounds, configuration: config)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
-        // 让 webView 背景透明，透出 BaseViewController 的渐变背景色
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
@@ -619,7 +603,6 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
     }
 
     @objc private func closeTapped() {
-        // 直接告诉最底层的 presentingViewController (即 PurchaseViewController) 把上面所有串联的模态弹窗全部关掉
         self.presentingViewController?.presentingViewController?.dismiss(animated: true) {
             self.onComplete?(self.orderId, self.orderNo)
         }
@@ -633,7 +616,6 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
         
         let urlString = url.absoluteString
         
-        // 1. 拦截微信支付特有的 URL Scheme (weixin://wap/pay?...)
         if url.scheme == "weixin" {
             if UIApplication.shared.canOpenURL(url) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
@@ -646,13 +628,11 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
             return
         }
         
-        // 2. 拦截并修正 checkmweb 的 Referer 和 redirect_url
         if urlString.hasPrefix("https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb") {
             let referer = navigationAction.request.value(forHTTPHeaderField: "Referer")
             let components = URLComponents(string: urlString)
             let currentRedirect = components?.queryItems?.first(where: { $0.name == "redirect_url" })?.value
             
-            // 如果 Referer 不对，或者重定向地址不是我们的 Scheme，则取消原请求并重新构造
             if referer != "https://www.musicasia.cn/" || currentRedirect != "www.musicasia.cn://" {
                 decisionHandler(.cancel)
                 
@@ -689,7 +669,6 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         activityIndicator.stopAnimating()
         let nsError = error as NSError
-        // 如果是因为拦截 weixin:// 导致的取消请求，则忽略报错
         if nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled {
             return
         }
