@@ -39,6 +39,11 @@ class SongViewController: BaseViewController {
         super.viewDidLoad()
         setupUI()
         switchTab(index: 0) // 默认猜你喜欢
+        NotificationCenter.default.addObserver(self, selector: #selector(playerStateChanged), name: NSNotification.Name("PlayerStateChanged"), object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -208,19 +213,26 @@ class SongViewController: BaseViewController {
         print("SongViewController: loadPageData() page \(currentPage) for category \(currentCategory)")
         let searchText = searchTextField.text ?? ""
         
+        if currentPage == 1 {
+            showLoading()
+        }
+        
         let completion: (Result<BasePageResponse<CollectionSongsResp>, NetworkError>) -> Void = { [weak self] result in
             guard let self = self else { return }
+            self.hideLoading()
+            
             switch result {
             case .success(let pageResponse):
                 let newSongs = pageResponse.data?.voList ?? []
                 let uiSongs = newSongs.map { song in
-                    Song(id: "\(song.collectionSongsId ?? 0)",
+                    let isCurrent = (song.songName == SongPlaybackManager.shared.currentSongName)
+                    return Song(id: "\(song.collectionSongsId ?? 0)",
                          name: song.songName ?? "未知歌曲",
                          artist: song.singer ?? "未知歌手",
                          source: (song.songNameSecret?.hasPrefix("http") == true) ? .changba : .unicom,
                          url: song.songNameSecret ?? "",
                          isFavorited: song.userIsCollect ?? false,
-                         isPlaying: false,
+                         isPlaying: isCurrent && AudioPlayerManager.shared.isPlaying,
                          isDownloaded: false)
                 }
                 
@@ -333,6 +345,15 @@ class SongViewController: BaseViewController {
     }
     
     // MARK: - Actions (A & B)
+    
+    @objc private func playerStateChanged() {
+        for (index, view) in songsStack.arrangedSubviews.enumerated() {
+            guard let row = view as? SongRowView else { continue }
+            let isCurrent = (row.titleLabel.text == SongPlaybackManager.shared.currentSongName)
+            row.updatePlayState(isPlaying: isCurrent && AudioPlayerManager.shared.isPlaying)
+        }
+    }
+    
     private func handleFav(at index: Int, songId: Int, isFav: Bool) {
         if isFav {
             SongAPI.disCollectSong(collectionSongsId: songId) { [weak self] result in
@@ -357,11 +378,8 @@ class SongViewController: BaseViewController {
             isDownloaded: song.isDownloaded,
             in: self
         ) { [weak self] in
-            // UI 更新
-            guard let self = self else { return }
-            var updatedSong = song
-            updatedSong.isPlaying = true
-            self.updateSongState(at: index, song: updatedSong)
+            // UI 更新由 playerStateChanged 处理
+            print("SongView: playSong success callback")
         }
     }
     

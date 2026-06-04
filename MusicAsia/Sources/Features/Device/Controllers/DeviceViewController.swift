@@ -12,7 +12,6 @@ class DeviceViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "设备"
-        
         setupUI()
     }
     
@@ -23,7 +22,6 @@ class DeviceViewController: BaseViewController {
     }
     
     private func setupUI() {
-        // Navigation Bar Add Button
         let addBtn = UIBarButtonItem(image: UIImage(systemName: "plus.square"), style: .plain, target: self, action: #selector(showAddPopup))
         addBtn.tintColor = .white
         navigationItem.rightBarButtonItem = addBtn
@@ -36,7 +34,6 @@ class DeviceViewController: BaseViewController {
         scrollView.addSubview(contentView)
         contentView.snp.makeConstraints { make in
             make.edges.width.equalToSuperview()
-            // 确保 contentView 至少有一点高度来让 StackView 能够展开
             make.height.greaterThanOrEqualTo(view.safeAreaLayoutGuide).priority(.low)
         }
         
@@ -73,7 +70,6 @@ class DeviceViewController: BaseViewController {
                 row.snp.makeConstraints { make in make.height.equalTo(60) }
             }
             
-            // 强制刷新布局，确保 UIStackView 能够正确渲染子视图
             DispatchQueue.main.async {
                 self.view.layoutIfNeeded()
             }
@@ -97,7 +93,6 @@ class DeviceViewController: BaseViewController {
         }
     }
     
-    // MARK: - Actions
     @objc private func showAddPopup() {
         if popup == nil {
             popup = BindDevicePopupView()
@@ -116,7 +111,6 @@ class DeviceViewController: BaseViewController {
         popup?.hide()
         let scannerVC = ScannerViewController()
         scannerVC.onScanSuccess = { [weak self] code in
-            // 扫码成功后自动填入并绑定，或者弹出弹窗
             self?.handleBind(serialNo: code)
         }
         navigationController?.pushViewController(scannerVC, animated: true)

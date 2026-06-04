@@ -15,6 +15,11 @@ class HomeViewController: BaseViewController {
         super.viewDidLoad()
         setupUI()
         loadData()
+        NotificationCenter.default.addObserver(self, selector: #selector(playerStateChanged), name: NSNotification.Name("PlayerStateChanged"), object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -100,8 +105,10 @@ class HomeViewController: BaseViewController {
     
     private func loadData() {
         print("HomeViewController: loadData() start")
+        showLoading()
         HomeAPI.getIndex { [weak self] result in
             guard let self = self else { return }
+            self.hideLoading()
             switch result {
             case .success(let indexResp):
                 self.handleIndexData(indexResp)
@@ -133,13 +140,14 @@ class HomeViewController: BaseViewController {
             }
             
             // Map CollectionSongsVO to Song model for UI temporarily
+            let isCurrent = (song.songName == SongPlaybackManager.shared.currentSongName)
             let uiSong = Song(id: "\(song.collectionSongsId ?? 0)",
                               name: song.songName ?? "未知歌曲",
                               artist: song.singer ?? "未知歌手",
                               source: .changba,
                               url: "",
                               isFavorited: song.userIsCollect ?? false,
-                              isPlaying: false,
+                              isPlaying: isCurrent && AudioPlayerManager.shared.isPlaying,
                               isDownloaded: false)
             row.configure(with: uiSong)
             row.onFavTapped = { [weak self] in
@@ -202,6 +210,18 @@ class HomeViewController: BaseViewController {
     
     // MARK: - Actions (业务逻辑)
     
+    @objc private func playerStateChanged() {
+        // 更新列表中的播放状态
+        for (index, view) in songsStack.arrangedSubviews.enumerated() {
+            guard let row = view as? SongRowView else { continue }
+            // 判断这行是否是当前播放的歌曲
+            // 但是这里我们没有保存 songs 数组供复用。我们在 handleIndexData 中绑定了。
+            // 简单的方法是比较 songName
+            let isCurrent = (row.titleLabel.text == SongPlaybackManager.shared.currentSongName)
+            row.updatePlayState(isPlaying: isCurrent && AudioPlayerManager.shared.isPlaying)
+        }
+    }
+    
     private func handleSongFav(at index: Int, songId: Int, isFav: Bool) {
         // A. 收藏/取消收藏
         if isFav {
@@ -235,7 +255,7 @@ class HomeViewController: BaseViewController {
             songSecret: secret,
             isDownloaded: false, // 首页未获取下载状态
             in: self
-        ) { [weak self] in
+        ) {
             // 播放成功后的 UI 状态更新（如需要）
             print("鉴权通过，开始播放: \(songName)")
         }

@@ -20,6 +20,10 @@ class OrderRowView: UIView {
     private func setupUI() {
         backgroundColor = .clear
         
+        self.snp.makeConstraints { make in
+            make.height.equalTo(90)
+        }
+        
         // 背景框
         bgView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
         bgView.layer.cornerRadius = 14
@@ -65,7 +69,7 @@ class OrderRowView: UIView {
         // Layout
         bgView.snp.makeConstraints { make in
             make.left.right.equalToSuperview()
-            make.centerY.equalToSuperview()
+            make.bottom.equalToSuperview()
             make.height.equalTo(76)
         }
         

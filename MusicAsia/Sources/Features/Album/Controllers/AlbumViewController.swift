@@ -135,8 +135,13 @@ class AlbumViewController: BaseViewController {
         print("AlbumViewController: loadPageData() page \(currentPage)")
         let searchText = searchTextField.text ?? ""
         
+        if currentPage == 1 {
+            showLoading()
+        }
+        
         AlbumAPI.getAlbums(pageNum: currentPage, pageSize: pageSize, collectionName: searchText) { [weak self] result in
             guard let self = self else { return }
+            self.hideLoading()
             switch result {
             case .success(let pageResponse):
                 let newAlbums = pageResponse.data?.voList ?? []

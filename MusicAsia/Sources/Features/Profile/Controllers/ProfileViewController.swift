@@ -31,16 +31,27 @@ class ProfileViewController: BaseViewController {
     private var downloadPopup: BatchDownloadPopupView?
     
     private var isFirstLoad = true
+    private var needsRefresh = false
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        NotificationCenter.default.addObserver(self, selector: #selector(playerStateChanged), name: NSNotification.Name("PlayerStateChanged"), object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+        
+        if needsRefresh {
+            needsRefresh = false
+            loadInitialData()
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -78,6 +89,7 @@ class ProfileViewController: BaseViewController {
         // 1. Header Card
         headerCard.onRenewTapped = { [weak self] in self?.handleRenew() }
         headerCard.orderBtn.addTarget(self, action: #selector(handleOrderTapped), for: .touchUpInside)
+        headerCard.bluetoothBtn.addTarget(self, action: #selector(handleBluetoothTapped), for: .touchUpInside)
         headerCard.deviceBtn.addTarget(self, action: #selector(handleDeviceTapped), for: .touchUpInside)
         headerCard.backgroundColor = .clear
         contentView.addSubview(headerCard)
@@ -292,9 +304,14 @@ class ProfileViewController: BaseViewController {
         print("ProfileViewController: loadPageData() page \(currentPage)")
         isLoading = true
         
+        if displaySongs.isEmpty {
+            showLoading()
+        }
+        
         ProfileAPI.getMeInfo(pageNum: currentPage, pageSize: pageSize) { [weak self] result in
             guard let self = self else { return }
             self.isLoading = false
+            self.hideLoading()
             
             switch result {
             case .success(let pageResponse):
@@ -302,13 +319,14 @@ class ProfileViewController: BaseViewController {
                 
                  let newSongs = data.voList ?? []
                  let uiSongs = newSongs.map { song in
-                      Song(id: "\(song.collectionSongsId ?? 0)",
+                      let isCurrent = (song.songName == SongPlaybackManager.shared.currentSongName)
+                      return Song(id: "\(song.collectionSongsId ?? 0)",
                            name: song.songName ?? "未知歌曲",
                            artist: song.singer ?? "未知歌手",
                            source: (song.songNameSecret?.hasPrefix("http") == true) ? .changba : .unicom,
                            url: song.songNameSecret ?? "",
                            isFavorited: true,
-                           isPlaying: false,
+                           isPlaying: isCurrent && AudioPlayerManager.shared.isPlaying,
                            isDownloaded: false)
                   }
                  
@@ -419,6 +437,7 @@ class ProfileViewController: BaseViewController {
     
     private func handleRenew() {
         print("跳转到购买套餐页面")
+        needsRefresh = true
         let purchaseVC = PurchaseViewController()
         purchaseVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(purchaseVC, animated: true)
@@ -445,6 +464,13 @@ class ProfileViewController: BaseViewController {
         let orderVC = OrderListViewController()
         orderVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(orderVC, animated: true)
+    }
+    
+    @objc private func handleBluetoothTapped() {
+        print("跳转到我的蓝牙页面")
+        let bluetoothVC = BluetoothListViewController()
+        bluetoothVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(bluetoothVC, animated: true)
     }
     
     @objc private func handleDeviceTapped() {
@@ -578,16 +604,18 @@ class ProfileViewController: BaseViewController {
     }
     
     // MARK: - Sing Logic (D)
-    private func handleSing(at index: Int) {
-        var song = displaySongs[index]
-        
-        // 切换暂停状态
-        if song.isPlaying {
-            song.isPlaying = false
-            AudioPlayerManager.shared.pause()
-            updateSongState(at: index, song: song)
-            return
+    
+    @objc private func playerStateChanged() {
+        for (index, view) in songsStack.arrangedSubviews.enumerated() {
+            guard let row = view as? ProfileSongRowView else { continue }
+            // 判断这行是否是当前播放的歌曲
+            let isCurrent = (row.titleLabel.text == SongPlaybackManager.shared.currentSongName)
+            row.updateSingState(isSinging: isCurrent && AudioPlayerManager.shared.isPlaying)
         }
+    }
+    
+    private func handleSing(at index: Int) {
+        let song = displaySongs[index]
         
         SongPlaybackManager.shared.playSong(
             songName: song.name,
@@ -595,20 +623,8 @@ class ProfileViewController: BaseViewController {
             isDownloaded: song.isDownloaded,
             in: self
         ) { [weak self] in
-            guard let self = self else { return }
-            // 暂停其他所有歌曲
-            for i in 0..<self.displaySongs.count {
-                self.displaySongs[i].isPlaying = false
-                if let r = self.songsStack.arrangedSubviews[i] as? ProfileSongRowView {
-                    r.configure(with: self.displaySongs[i])
-                }
-            }
-            // 权限验证通过，执行播放
-            song.isPlaying = true
-            self.displaySongs[index] = song
-            if let row = self.songsStack.arrangedSubviews[index] as? ProfileSongRowView {
-                row.configure(with: song)
-            }
+            // UI更新已经由 playerStateChanged 处理
+            print("Profile: playSong success callback")
         }
     }
     
@@ -633,5 +649,151 @@ extension ProfileViewController: UIScrollViewDelegate {
                 loadPageData()
             }
         }
+    }
+}
+// MARK: - BluetoothListViewController
+class BluetoothListViewController: BaseViewController {
+    
+    // MARK: - UI Components
+    private let tableView = UITableView(frame: .zero, style: .plain)
+    private let emptyLabel = UILabel()
+    
+    // MARK: - Data
+    private var bluetoothList: [UserBluetoothVO] = []
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+        loadData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
+    private func setupUI() {
+        title = "我的蓝牙"
+        // 移除固定的 backgroundColor 设置，让它继承 BaseViewController 的全局渐变背景
+        
+        // TableView
+        tableView.backgroundColor = .clear
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.separatorStyle = .none
+        tableView.register(BluetoothCell.self, forCellReuseIdentifier: "BluetoothCell")
+        tableView.rowHeight = 70
+        view.addSubview(tableView)
+        
+        tableView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        // Empty Label
+        emptyLabel.text = "暂无绑定的蓝牙设备"
+        emptyLabel.textColor = .lightGray
+        emptyLabel.font = .systemFont(ofSize: 14)
+        emptyLabel.textAlignment = .center
+        emptyLabel.isHidden = true
+        view.addSubview(emptyLabel)
+        
+        emptyLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+    }
+    
+    private func loadData() {
+        showLoading()
+        BluetoothAPI.getBluetoothList { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.hideLoading()
+                switch result {
+                case .success(let resp):
+                    self.bluetoothList = resp.voList ?? []
+                    self.tableView.reloadData()
+                    self.emptyLabel.isHidden = !self.bluetoothList.isEmpty
+                case .failure(let error):
+                    self.showAlert(message: "获取蓝牙列表失败: \(error.localizedDescription)")
+                    self.emptyLabel.isHidden = !self.bluetoothList.isEmpty
+                }
+            }
+        }
+    }
+    
+    private func showAlert(message: String) {
+        let alert = UIAlertController(title: "提示", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "确定", style: .default))
+        present(alert, animated: true)
+    }
+}
+
+// MARK: - UITableViewDelegate & DataSource
+extension BluetoothListViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return bluetoothList.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "BluetoothCell", for: indexPath) as! BluetoothCell
+        let device = bluetoothList[indexPath.row]
+        cell.configure(name: device.bluetoothName ?? "未知设备")
+        return cell
+    }
+}
+
+// MARK: - BluetoothCell
+class BluetoothCell: UITableViewCell {
+    
+    private let containerView = UIView()
+    private let iconImageView = UIImageView()
+    private let nameLabel = UILabel()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupUI() {
+        backgroundColor = .clear
+        selectionStyle = .none
+        
+        containerView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
+        containerView.layer.cornerRadius = 12
+        contentView.addSubview(containerView)
+        
+        containerView.snp.makeConstraints { make in
+            make.top.bottom.equalToSuperview().inset(6)
+            make.left.right.equalToSuperview().inset(16)
+        }
+        
+        iconImageView.image = UIImage(systemName: "candybarphone")
+        iconImageView.tintColor = .white
+        iconImageView.contentMode = .scaleAspectFit
+        containerView.addSubview(iconImageView)
+        
+        iconImageView.snp.makeConstraints { make in
+            make.left.equalToSuperview().offset(16)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(24)
+        }
+        
+        nameLabel.textColor = .white
+        nameLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        containerView.addSubview(nameLabel)
+        
+        nameLabel.snp.makeConstraints { make in
+            make.left.equalTo(iconImageView.snp.right).offset(12)
+            make.right.equalToSuperview().offset(-16)
+            make.centerY.equalToSuperview()
+        }
+    }
+    
+    func configure(name: String) {
+        nameLabel.text = name
     }
 }

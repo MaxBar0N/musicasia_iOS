@@ -241,9 +241,11 @@ class ProfileSongRowView: UIView {
     func configure(with song: Song) {
         titleLabel.text = song.name
         artistLabel.text = song.artist
-        
-        // 如果正在播放，麦克风图标可以高亮或变成暂停图标
-        if song.isPlaying {
+        updateSingState(isSinging: song.isPlaying)
+    }
+    
+    func updateSingState(isSinging: Bool) {
+        if isSinging {
             singButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
             singButton.tintColor = UIColor(hex: "#16E0BF")
         } else {

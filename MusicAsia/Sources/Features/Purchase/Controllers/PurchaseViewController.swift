@@ -1,4 +1,5 @@
 import UIKit
+import WebKit
 import SnapKit
 
 class PurchaseViewController: BaseViewController {
@@ -42,9 +43,11 @@ class PurchaseViewController: BaseViewController {
     }
     
     private func loadData() {
+        showLoading()
         // 先获取套餐分类字典 user_menu_type
         OrderAPI.getDictData(dictType: "user_menu_type") { [weak self] dictResult in
             guard let self = self else { return }
+            self.hideLoading()
             
             var dictCategories: [PackageCategory] = []
             
@@ -91,8 +94,11 @@ class PurchaseViewController: BaseViewController {
         
         let dictValue = currentCat.id
         
+        showLoading()
         OrderAPI.getMenuList(dictValue: dictValue) { [weak self] result in
             guard let self = self else { return }
+            self.hideLoading()
+            
             switch result {
             case .success(let response):
                 let list = response.voList ?? []
@@ -441,9 +447,7 @@ class PurchaseViewController: BaseViewController {
         
         let pkg = category.packages[currentPackageIndex]
         
-        // C1、试用套餐重复购买拦截校验
         if pkg.isTrial {
-            // TODO: 这里应根据后台接口或订单列表校验，暂用 UserDefaults 模拟本地已购记录
             let trialPurchasedKey = "HasPurchasedTrial_\(pkg.id)"
             if UserDefaults.standard.bool(forKey: trialPurchasedKey) {
                 showAlert(message: "试用套餐每个账号只能购买一次，请购买其他的套餐，谢谢")
@@ -452,24 +456,75 @@ class PurchaseViewController: BaseViewController {
             UserDefaults.standard.set(true, forKey: trialPurchasedKey)
         }
         
-        // C2、发起支付前先调后台下单接口
         guard let setMenuId = Int(pkg.id) else { return }
         
         let loadingAlert = UIAlertController(title: "正在创建订单...", message: nil, preferredStyle: .alert)
         present(loadingAlert, animated: true)
         
-        OrderAPI.placeAppOrder(setMenuId: setMenuId) { [weak self] result in
+        OrderAPI.placeH5Order(setMenuId: setMenuId) { [weak self] result in
+            guard let self = self else { return }
+            
+            // 确保所有的 UI 弹出和关闭操作都在主线程执行，防止卡顿和延迟
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let orderInfo):
+                    if let urlString = orderInfo.h5Url, let url = URL(string: urlString) {
+                        let webVC = PaymentWebViewController()
+                        webVC.url = url
+                        webVC.orderId = orderInfo.orderId ?? 0
+                        webVC.orderNo = orderInfo.orderCode ?? ""
+                        webVC.onComplete = { [weak self] oId, oNo in
+                            self?.showPaymentConfirmPopup(orderId: oId, orderNo: oNo)
+                        }
+                        
+                        let nav = UINavigationController(rootViewController: webVC)
+                        nav.modalPresentationStyle = .fullScreen
+                        
+                        // 由于 iOS 限制不能在有 present 的情况下再次 present
+                        // 我们让当前的 loadingAlert 主动去 present 新的 WebView 页面
+                        loadingAlert.present(nav, animated: true) {
+                            // 可选：在新页面完全展示后，其实不需要手动 dismiss alert
+                            // 因为当用户关闭 webVC 时，我们可以顺带把底层 alert 一起关掉
+                        }
+                    } else {
+                        loadingAlert.dismiss(animated: true) {
+                            self.showAlert(message: "获取支付链接失败")
+                        }
+                    }
+                case .failure(let error):
+                    loadingAlert.dismiss(animated: true) {
+                        self.showAlert(message: "创建订单失败: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+    
+    private func showPaymentConfirmPopup(orderId: Int, orderNo: String) {
+        let alert = UIAlertController(title: "支付确认", message: "请确认您是否已在微信内完成支付？", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "已完成支付", style: .default, handler: { [weak self] _ in
+            self?.checkPaymentStatus(orderId: orderId, orderNo: orderNo)
+        }))
+        alert.addAction(UIAlertAction(title: "重新支付", style: .cancel, handler: nil))
+        self.present(alert, animated: true)
+    }
+    
+    private func checkPaymentStatus(orderId: Int, orderNo: String) {
+        let loadingAlert = UIAlertController(title: "正在查询...", message: nil, preferredStyle: .alert)
+        present(loadingAlert, animated: true)
+        
+        OrderAPI.checkPayment(orderId: orderId) { [weak self] result in
             guard let self = self else { return }
             loadingAlert.dismiss(animated: true) {
                 switch result {
-                case .success(let orderInfo):
-                    // 下单成功后，这里应该是唤起微信支付 SDK
-                    // 模拟支付成功流程 (D7: 跳转下单成功页)
-                    let orderNo = orderInfo ?? "WX_PAY_MOCK_ORDER"
-                    print("后台订单创建成功，准备唤起微信支付: \(orderNo)")
-                    self.simulateWechatPaySuccess(orderNo: orderNo)
+                case .success(let resp):
+                    if resp.isPay == true {
+                        self.showSuccessPopup(orderNo: orderNo)
+                    } else {
+                        self.showAlert(message: "订单暂未支付成功，请稍后再试或重新支付")
+                    }
                 case .failure(let error):
-                    self.showAlert(message: "创建订单失败: \(error.localizedDescription)")
+                    self.showAlert(message: "查询状态失败: \(error.localizedDescription)")
                 }
             }
         }
@@ -521,5 +576,123 @@ extension PurchaseViewController: UICollectionViewDelegate, UICollectionViewData
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         currentPackageIndex = indexPath.row
         updatePayButtonPrice()
+    }
+}
+
+class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
+    var url: URL!
+    var orderId: Int = 0
+    var orderNo: String = ""
+    var onComplete: ((Int, String) -> Void)?
+
+    private var webView: WKWebView!
+    private var activityIndicator: UIActivityIndicatorView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "支付订单"
+        // BaseViewController 已经处理了渐变背景，这里将 webView 背景透明即可
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "关闭", style: .plain, target: self, action: #selector(closeTapped))
+
+        let config = WKWebViewConfiguration()
+        webView = WKWebView(frame: view.bounds, configuration: config)
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.navigationDelegate = self
+        // 让 webView 背景透明，透出 BaseViewController 的渐变背景色
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+        view.addSubview(webView)
+        
+        activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.center = view.center
+        activityIndicator.autoresizingMask = [.flexibleTopMargin, .flexibleBottomMargin, .flexibleLeftMargin, .flexibleRightMargin]
+        activityIndicator.hidesWhenStopped = true
+        view.addSubview(activityIndicator)
+        
+        activityIndicator.startAnimating()
+
+        var request = URLRequest(url: url)
+        request.setValue("https://www.musicasia.cn/", forHTTPHeaderField: "Referer")
+        webView.load(request)
+    }
+
+    @objc private func closeTapped() {
+        // 直接告诉最底层的 presentingViewController (即 PurchaseViewController) 把上面所有串联的模态弹窗全部关掉
+        self.presentingViewController?.presentingViewController?.dismiss(animated: true) {
+            self.onComplete?(self.orderId, self.orderNo)
+        }
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.allow)
+            return
+        }
+        
+        let urlString = url.absoluteString
+        
+        // 1. 拦截微信支付特有的 URL Scheme (weixin://wap/pay?...)
+        if url.scheme == "weixin" {
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                let alert = UIAlertController(title: "提示", message: "您似乎没有安装微信，无法完成支付", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "确定", style: .default, handler: nil))
+                self.present(alert, animated: true)
+            }
+            decisionHandler(.cancel)
+            return
+        }
+        
+        // 2. 拦截并修正 checkmweb 的 Referer 和 redirect_url
+        if urlString.hasPrefix("https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb") {
+            let referer = navigationAction.request.value(forHTTPHeaderField: "Referer")
+            let components = URLComponents(string: urlString)
+            let currentRedirect = components?.queryItems?.first(where: { $0.name == "redirect_url" })?.value
+            
+            // 如果 Referer 不对，或者重定向地址不是我们的 Scheme，则取消原请求并重新构造
+            if referer != "https://www.musicasia.cn/" || currentRedirect != "www.musicasia.cn://" {
+                decisionHandler(.cancel)
+                
+                var finalUrlString = urlString
+                if var comps = URLComponents(string: urlString) {
+                    var queryItems = comps.queryItems?.filter { $0.name != "redirect_url" } ?? []
+                    queryItems.append(URLQueryItem(name: "redirect_url", value: "www.musicasia.cn://"))
+                    comps.queryItems = queryItems
+                    if let newUrl = comps.url {
+                        finalUrlString = newUrl.absoluteString
+                    }
+                }
+                
+                guard let newURL = URL(string: finalUrlString) else { return }
+                var newRequest = URLRequest(url: newURL)
+                newRequest.setValue("https://www.musicasia.cn/", forHTTPHeaderField: "Referer")
+                webView.load(newRequest)
+                return
+            }
+        }
+        
+        decisionHandler(.allow)
+    }
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        activityIndicator.stopAnimating()
+    }
+    
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        activityIndicator.stopAnimating()
+        print("WebView Error: \(error.localizedDescription)")
+    }
+    
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        activityIndicator.stopAnimating()
+        let nsError = error as NSError
+        // 如果是因为拦截 weixin:// 导致的取消请求，则忽略报错
+        if nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled {
+            return
+        }
+        print("WebView Error: \(error.localizedDescription)")
     }
 }

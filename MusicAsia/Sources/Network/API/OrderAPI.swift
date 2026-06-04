@@ -83,6 +83,31 @@ struct PlaceOrderReq: Encodable {
     let setMenuId: Int
 }
 
+struct PrepayWithRequestPaymentResponse: Decodable {
+    let appid: String?
+    let nonceStr: String?
+    let packageVal: String?
+    let partnerId: String?
+    let prepayId: String?
+    let sign: String?
+    let timestamp: String?
+    let orderId: Int? // 假设后端能同时返回 orderId 供查询状态
+}
+
+struct H5OrderPayResp: Decodable {
+    let h5Url: String?
+    let orderCode: String?
+    let orderId: Int?
+}
+
+struct OrderPaymentQueryReq: Encodable {
+    let orderId: Int
+}
+
+struct QueryOrderPayStatusResp: Decodable {
+    let isPay: Bool?
+}
+
 class OrderAPI {
     
     // 获取订单分页列表
@@ -107,12 +132,38 @@ class OrderAPI {
     }
     
     // App 下单
-    static func placeAppOrder(setMenuId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+    static func placeAppOrder(setMenuId: Int, completion: @escaping (Result<PrepayWithRequestPaymentResponse, NetworkError>) -> Void) {
         let body = PlaceOrderReq(setMenuId: setMenuId)
         do {
             let data = try JSONEncoder().encode(body)
             if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                 NetworkManager.shared.request(APIService.Order.payApp, method: .post, parameters: params, completion: completion)
+            }
+        } catch {
+            completion(.failure(.decodingError))
+        }
+    }
+    
+    // H5 下单
+    static func placeH5Order(setMenuId: Int, completion: @escaping (Result<H5OrderPayResp, NetworkError>) -> Void) {
+        let body = PlaceOrderReq(setMenuId: setMenuId)
+        do {
+            let data = try JSONEncoder().encode(body)
+            if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                NetworkManager.shared.request(APIService.Order.payH5, method: .post, parameters: params, completion: completion)
+            }
+        } catch {
+            completion(.failure(.decodingError))
+        }
+    }
+    
+    // 查询订单支付状态
+    static func checkPayment(orderId: Int, completion: @escaping (Result<QueryOrderPayStatusResp, NetworkError>) -> Void) {
+        let body = OrderPaymentQueryReq(orderId: orderId)
+        do {
+            let data = try JSONEncoder().encode(body)
+            if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                NetworkManager.shared.request(APIService.Order.checkPayment, method: .post, parameters: params, completion: completion)
             }
         } catch {
             completion(.failure(.decodingError))

@@ -16,8 +16,8 @@ struct GetSongUrlReq: Encodable {
 }
 
 struct CheckBluetoothReq: Encodable {
-    let bluetoothMacAddress: String
-    let bluetoothName: String
+    let bluetoothMacAddress: String?
+    let bluetoothName: String?
 }
 
 struct CheckHasPermissionResp: Decodable {
@@ -25,9 +25,18 @@ struct CheckHasPermissionResp: Decodable {
     let msg: String?
 }
 
+struct UserBluetoothVO: Decodable {
+    let bluetoothName: String?
+    let userBluetoothId: Int?
+}
+
+struct UserBluetoothResp: Decodable {
+    let voList: [UserBluetoothVO]?
+}
+
 class BluetoothAPI {
     // 判断蓝牙是否有权限
-    static func checkBluetooth(mac: String, name: String, completion: @escaping (Result<CheckHasPermissionResp, NetworkError>) -> Void) {
+    static func checkBluetooth(mac: String?, name: String?, completion: @escaping (Result<CheckHasPermissionResp, NetworkError>) -> Void) {
         let body = CheckBluetoothReq(bluetoothMacAddress: mac, bluetoothName: name)
         do {
             let data = try JSONEncoder().encode(body)
@@ -36,6 +45,13 @@ class BluetoothAPI {
             }
         } catch {
             completion(.failure(.decodingError))
+        }
+    }
+    
+    // 获取蓝牙列表
+    static func getBluetoothList(completion: @escaping (Result<UserBluetoothResp, NetworkError>) -> Void) {
+        NetworkManager.shared.request("/phone/user/bluetooth/list", method: .get, parameters: nil) { (result: Result<UserBluetoothResp, NetworkError>) in
+            completion(result)
         }
     }
 }

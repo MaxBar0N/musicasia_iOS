@@ -77,6 +77,7 @@ class OrderListViewController: BaseViewController {
             make.top.equalTo(ordersStack.snp.bottom).offset(20)
             make.left.right.equalToSuperview()
             make.height.equalTo(60)
+            make.bottom.equalToSuperview().offset(-30)
         }
     }
     
@@ -92,9 +93,14 @@ class OrderListViewController: BaseViewController {
         isLoading = true
         print("OrderListViewController: loadPageData() page \(currentPage)")
         
+        if currentPage == 1 {
+            showLoading()
+        }
+        
         OrderAPI.getOrders(pageNum: currentPage, pageSize: pageSize) { [weak self] result in
             guard let self = self else { return }
             self.isLoading = false
+            self.hideLoading()
             switch result {
             case .success(let pageResponse):
                 let orders = pageResponse.data?.voList ?? []
@@ -143,13 +149,7 @@ class OrderListViewController: BaseViewController {
     }
     
     private func updateFooterPosition() {
-        // Just empty method for old reference if any
-        DispatchQueue.main.async {
-            self.contentView.snp.remakeConstraints { make in
-                make.edges.width.equalToSuperview()
-                make.bottom.equalTo(self.ordersStack.snp.bottom).offset(30)
-            }
-        }
+        // Automatically handled by SnapKit bottom constraint
     }
     
     // MARK: - Actions

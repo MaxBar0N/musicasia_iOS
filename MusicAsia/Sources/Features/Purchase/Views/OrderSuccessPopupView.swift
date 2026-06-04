@@ -3,6 +3,7 @@ import SnapKit
 
 class OrderSuccessPopupView: UIView {
     private let containerView = UIView()
+    private let containerGradientLayer = CAGradientLayer()
     private let titleLabel = UILabel()
     private let orderNoLabel = UILabel()
     private let homeButton = GradientBorderButton()
@@ -19,9 +20,17 @@ class OrderSuccessPopupView: UIView {
     private func setupUI() {
         backgroundColor = UIColor.black.withAlphaComponent(0.6)
         
-        containerView.backgroundColor = UIColor(hex: "#3D3DD8")
         containerView.layer.cornerRadius = 16
+        containerView.clipsToBounds = true
         addSubview(containerView)
+        
+        containerGradientLayer.colors = [
+            UIColor(hex: "#50A4E0").cgColor,
+            UIColor(hex: "#7835EB").cgColor
+        ]
+        containerGradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        containerGradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        containerView.layer.insertSublayer(containerGradientLayer, at: 0)
         
         titleLabel.text = "恭喜你,下单成功"
         titleLabel.textColor = .white
@@ -34,13 +43,11 @@ class OrderSuccessPopupView: UIView {
         closeBtn.addTarget(self, action: #selector(hide), for: .touchUpInside)
         containerView.addSubview(closeBtn)
         
-        // 礼盒图片占位
+        // 礼盒图片
         let giftImageView = UIImageView()
-        giftImageView.image = UIImage(systemName: "gift.fill")
-        giftImageView.tintColor = .white
-        giftImageView.contentMode = .scaleAspectFit
-        giftImageView.backgroundColor = UIColor.white.withAlphaComponent(0.2)
-        giftImageView.layer.cornerRadius = 8
+        giftImageView.image = UIImage(named: "order_success_image")
+        giftImageView.contentMode = .scaleAspectFill
+        giftImageView.clipsToBounds = true
         containerView.addSubview(giftImageView)
         
         // 订单号背景
@@ -55,10 +62,12 @@ class OrderSuccessPopupView: UIView {
         
         // 按钮
         homeButton.setTitle("返回首页", for: .normal)
+        homeButton.customCornerRadius = 22
         homeButton.addTarget(self, action: #selector(homeAction), for: .touchUpInside)
         containerView.addSubview(homeButton)
         
         receiveCodeButton.setTitle("领取VIP激活码", for: .normal)
+        receiveCodeButton.customCornerRadius = 22
         receiveCodeButton.addTarget(self, action: #selector(receiveCodeAction), for: .touchUpInside)
         containerView.addSubview(receiveCodeButton)
         
@@ -82,8 +91,8 @@ class OrderSuccessPopupView: UIView {
         giftImageView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
-            make.width.equalTo(160)
-            make.height.equalTo(100)
+            make.width.equalTo(120)
+            make.height.equalTo(80)
         }
         
         orderNoBg.snp.makeConstraints { make in
@@ -110,6 +119,11 @@ class OrderSuccessPopupView: UIView {
             make.bottom.equalToSuperview().offset(-20)
             make.height.equalTo(44)
         }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        containerGradientLayer.frame = containerView.bounds
     }
     
     func configure(orderNo: String) {

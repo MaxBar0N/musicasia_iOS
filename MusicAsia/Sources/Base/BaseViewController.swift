@@ -70,9 +70,62 @@ class BaseViewController: UIViewController {
     // 使用 CAGradientLayer 来实现 CSS 的 linear-gradient
     let gradientLayer = CAGradientLayer()
     
+    // 全局 Loading Indicator
+    private let loadingContainer = UIView()
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupGlobalBackground()
+        setupGlobalNavigationBar()
+        setupLoadingIndicator()
+    }
+    
+    private func setupLoadingIndicator() {
+        // 配置半透明背景框
+        loadingContainer.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        loadingContainer.layer.cornerRadius = 10
+        loadingContainer.isHidden = true
+        view.addSubview(loadingContainer)
+        
+        loadingContainer.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.height.equalTo(80)
+        }
+        
+        // 配置菊花
+        activityIndicator.color = .white
+        loadingContainer.addSubview(activityIndicator)
+        
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+    }
+    
+    func showLoading() {
+        view.bringSubviewToFront(loadingContainer)
+        loadingContainer.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    func hideLoading() {
+        loadingContainer.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+    
+    private func setupGlobalNavigationBar() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .clear
+        appearance.shadowColor = .clear // 去掉下方的黑线/分割线
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        
+        // 统一返回按钮和图标的颜色
+        navigationController?.navigationBar.tintColor = .white
     }
     
     private func setupGlobalBackground() {

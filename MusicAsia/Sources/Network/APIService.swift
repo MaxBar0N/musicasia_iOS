@@ -51,6 +51,7 @@ struct APIService {
         static let menuList = "/order/menu/list"
         static let page = "/phone/order/page"
         static let payApp = "/phone/order/pay/app"
+        static let payH5 = "/phone/order/pay/h5"
         static let checkPayment = "/phone/order/checkPayment"
     }
     

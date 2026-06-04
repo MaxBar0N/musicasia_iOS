@@ -17,9 +17,19 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
+        <string>1</string>
+        <key>LSApplicationQueriesSchemes</key>
+        <array>
+                <string>weixin</string>
+                <string>wechat</string>
+                <string>weixinULAPI</string>
+        </array>
+        <key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>我们需要使用蓝牙来连接您的外接播放设备，以保证歌曲的正常播放</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>我们需要使用蓝牙来连接您的外接播放设备，以保证歌曲的正常播放</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
