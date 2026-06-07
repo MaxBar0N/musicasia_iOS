@@ -113,7 +113,12 @@ class SongAPI {
         do {
             let data = try JSONEncoder().encode(body)
             if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                NetworkManager.shared.request(APIService.Song.collect, method: .post, parameters: params, completion: completion)
+                NetworkManager.shared.request(APIService.Song.collect, method: .post, parameters: params) { (result: Result<AnyDecodableValue?, NetworkError>) in
+                    if case .success = result {
+                        NotificationCenter.default.post(name: NSNotification.Name("UserCollectionChanged"), object: nil)
+                    }
+                    completion(result)
+                }
             }
         } catch {
             completion(.failure(.decodingError))
@@ -125,7 +130,12 @@ class SongAPI {
         do {
             let data = try JSONEncoder().encode(body)
             if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                NetworkManager.shared.request(APIService.Song.disCollect, method: .post, parameters: params, completion: completion)
+                NetworkManager.shared.request(APIService.Song.disCollect, method: .post, parameters: params) { (result: Result<AnyDecodableValue?, NetworkError>) in
+                    if case .success = result {
+                        NotificationCenter.default.post(name: NSNotification.Name("UserCollectionChanged"), object: nil)
+                    }
+                    completion(result)
+                }
             }
         } catch {
             completion(.failure(.decodingError))

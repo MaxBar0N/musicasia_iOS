@@ -39,6 +39,8 @@ class AdCardView: UIView {
     private let imageView = UIImageView()
     private let titleLabel = UILabel()
     
+    var onTap: (() -> Void)?
+    
     init(title: String, imageUrl: String) {
         super.init(frame: .zero)
         layer.cornerRadius = 12
@@ -65,9 +67,17 @@ class AdCardView: UIView {
             make.centerX.equalToSuperview()
             make.bottom.equalToSuperview().offset(-10)
         }
+        
+        isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        addGestureRecognizer(tap)
     }
     
     required init?(coder: NSCoder) { fatalError() }
+    
+    @objc private func handleTap() {
+        onTap?()
+    }
 }
 
 // MARK: - Song Row View
@@ -158,6 +168,11 @@ class AlbumCardView: UIView {
         super.init(frame: .zero)
         layer.cornerRadius = 12
         clipsToBounds = true
+        
+        // Add tap gesture to the whole card
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(playAction))
+        self.addGestureRecognizer(tapGesture)
+        self.isUserInteractionEnabled = true
         
         imageView.contentMode = .scaleAspectFill
         addSubview(imageView)

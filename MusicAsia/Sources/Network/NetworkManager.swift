@@ -63,6 +63,7 @@ struct BaseResponse<T: Decodable>: Decodable {
 /// 忽略任意类型的 data 数据
 struct AnyDecodableValue: Decodable {
     init(from decoder: Decoder) throws {}
+    init() {} // 提供默认构造器
 }
 
 /// 带有分页信息的响应结构
@@ -122,8 +123,8 @@ class NetworkManager {
     
     private init() {
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 30 // 请求超时 30s
-        configuration.timeoutIntervalForResource = 60 // 资源超时 60s
+        configuration.timeoutIntervalForRequest = 60 // 请求超时改为 60s
+        configuration.timeoutIntervalForResource = 120 // 资源超时改为 120s
         self.session = Session(configuration: configuration)
     }
     
@@ -159,8 +160,9 @@ class NetworkManager {
             completion(.failure(.invalidURL))
             return
         }
-        
-        // 判断参数编码方式：GET 用 URLEncoding，POST 等用 JSONEncoding
+ 
+        // 恢复默认的编码方式：GET 用 URLEncoding，POST 等用 JSONEncoding
+        // 从最新的后端报错日志看，后端实际上确实期待 JSON 格式的请求体，所以不能强制转为 URLEncoding
         let encoding: ParameterEncoding = (method == .get) ? URLEncoding.default : JSONEncoding.default
         
         session.request(url, 
@@ -171,10 +173,22 @@ class NetworkManager {
             .validate(statusCode: 200..<300)
             .responseData { response in
                 if let data = response.data, let str = String(data: data, encoding: .utf8) {
+                    // 打印响应数据
                     print("🌐 API Response [\(endpoint)]: \(str)")
                 }
                 
                 if let error = response.error {
+                    if let underlyingError = error.underlyingError as? URLError {
+                        if underlyingError.code == .timedOut {
+                            completion(.failure(.serverError(statusCode: -1001, message: "网络请求超时，请检查网络后重试")))
+                            return
+                        } else if underlyingError.code == .notConnectedToInternet || underlyingError.code == .networkConnectionLost {
+                            // 遇到真正的断网，不应该继续走下面的 decoding，应该直接返回一个友好的无网络提示，而不是让系统抛出英文的 URLError
+                            completion(.failure(.serverError(statusCode: -1009, message: "当前网络连接不可用，请检查网络后重试")))
+                            return
+                        }
+                    }
+                    
                     var errorMsg = error.localizedDescription
                     if let statusCode = response.response?.statusCode {
                         if statusCode == 401 {
@@ -204,11 +218,14 @@ class NetworkManager {
                     if baseResponse.isSuccess {
                         if let bizData = baseResponse.data {
                             completion(.success(bizData))
+                        } else if T.self == AnyDecodableValue.self, let dummy = AnyDecodableValue() as? T {
+                            completion(.success(dummy))
                         } else if let emptyData = Optional<Any>.none as? T {
                             completion(.success(emptyData))
                         } else if let errorMsg = baseResponse.decodingErrorMsg {
                             completion(.failure(.serverError(statusCode: 200, message: "解析详情: \(errorMsg)")))
                         } else {
+                            // 对于非 AnyDecodableValue 的泛型，如果确实没返回 data 则报错
                             completion(.failure(.noData))
                         }
                     } else {
@@ -337,11 +354,161 @@ class NetworkManager {
             }
     }
     
+    // 专门为 getInfo 提供的方法，因为它的数据包在 user 字段里而不是 data
+    func requestUserInfo<T: Decodable>(_ endpoint: String, method: HTTPMethod = .get, parameters: [String: Any]? = nil, completion: @escaping (Result<T, NetworkError>) -> Void) {
+        let url = baseURL + endpoint
+        
+        session.request(url,
+                        method: method,
+                        parameters: parameters,
+                        encoding: URLEncoding.default,
+                        headers: commonHeaders())
+            .validate(statusCode: 200..<300)
+            .responseData { response in
+                if let data = response.data, let str = String(data: data, encoding: .utf8) {
+                    print("🌐 API Response [\(endpoint)]: \(str)")
+                }
+            }
+            .responseDecodable(of: UserInfoBaseResponse<T>.self) { response in
+                if let error = response.error {
+                    completion(.failure(.serverError(statusCode: response.response?.statusCode ?? 500, message: error.localizedDescription)))
+                    return
+                }
+                
+                guard let baseResponse = response.value else {
+                    completion(.failure(.noData))
+                    return
+                }
+                
+                if baseResponse.isSuccess {
+                    if let user = baseResponse.user {
+                        completion(.success(user))
+                    } else {
+                        completion(.failure(.noData))
+                    }
+                } else {
+                    completion(.failure(.serverError(statusCode: baseResponse.code, message: baseResponse.msg ?? "未知错误")))
+                }
+            }
+    }
+    
+    /// 图片上传专属响应结构体（针对 /common/upload 接口字段）
+    struct UploadResponse: Decodable {
+        let code: Int
+        let msg: String?
+        let url: String?
+        
+        var isSuccess: Bool {
+            return code == 200 || code == 0
+        }
+    }
+    
+    struct UserInfoBaseResponse<T: Decodable>: Decodable {
+        let code: Int
+        let msg: String?
+        let user: T?
+        
+        var isSuccess: Bool {
+            return code == 200 || code == 0
+        }
+    }
+    
+    /// 图片上传
+    func uploadImage(_ image: UIImage, 
+                     endpoint: String,
+                     parameters: [String: Any]? = nil,
+                     completion: @escaping (Result<String, NetworkError>) -> Void) {
+        let urlString = endpoint.hasPrefix("http") ? endpoint : baseURL + endpoint
+        guard let url = URL(string: urlString) else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        // 降低图片压缩质量以减小文件体积，加速上传
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else {
+            completion(.failure(.noData))
+            return
+        }
+        
+        // 针对文件上传，如果后端不需要 JSON，我们需要覆盖 Content-Type，Alamofire的 upload 会自动处理 multipart
+        var headers = commonHeaders()
+        headers.remove(name: "Content-Type")
+        
+        session.upload(multipartFormData: { multipartFormData in
+            // 追加图片数据
+            multipartFormData.append(imageData, withName: "file", fileName: "upload.jpg", mimeType: "image/jpeg")
+            
+            // 追加其他参数
+            if let params = parameters {
+                for (key, value) in params {
+                    if let stringValue = value as? String, let stringData = stringValue.data(using: .utf8) {
+                        multipartFormData.append(stringData, withName: key)
+                    } else if let intValue = value as? Int, let stringData = "\(intValue)".data(using: .utf8) {
+                        multipartFormData.append(stringData, withName: key)
+                    }
+                }
+            }
+        }, to: url, method: .post, headers: headers)
+        .validate(statusCode: 200..<300)
+        .responseData { response in
+            if let data = response.data, let str = String(data: data, encoding: .utf8) {
+                print("🌐 API Upload Response [\(endpoint)]: \(str)")
+            }
+            
+            if let error = response.error {
+                // 如果网络超时，给予明确的提示
+                if let underlyingError = error.underlyingError as? URLError, underlyingError.code == .timedOut {
+                    completion(.failure(.serverError(statusCode: -1001, message: "图片上传超时，请检查网络后重试")))
+                    return
+                }
+                
+                if let statusCode = response.response?.statusCode {
+                    if statusCode == 401 {
+                        self.handleTokenExpiration()
+                    }
+                    completion(.failure(.serverError(statusCode: statusCode, message: "Upload Error: \(error.localizedDescription)")))
+                } else {
+                    completion(.failure(.unknown(error)))
+                }
+                return
+            }
+            
+            guard let data = response.data else {
+                completion(.failure(.noData))
+                return
+            }
+            
+            do {
+                // 使用专属的 UploadResponse 进行解析，因为它的图片地址字段是 url 而不是嵌套在 data 里的
+                let uploadResponse = try JSONDecoder().decode(UploadResponse.self, from: data)
+                
+                if uploadResponse.code == 401 {
+                    self.handleTokenExpiration()
+                    completion(.failure(.serverError(statusCode: 401, message: "Token 已过期，请重新登录")))
+                    return
+                }
+                
+                if uploadResponse.isSuccess {
+                    if let urlString = uploadResponse.url {
+                        completion(.success(urlString))
+                    } else {
+                        completion(.failure(.serverError(statusCode: 200, message: "上传成功但未返回图片地址")))
+                    }
+                } else {
+                    completion(.failure(.serverError(statusCode: uploadResponse.code, message: uploadResponse.msg ?? "上传失败")))
+                }
+            } catch {
+                completion(.failure(.decodingError))
+            }
+        }
+    }
+    
     private func handleTokenExpiration() {
         // 在主线程处理 Token 过期
         DispatchQueue.main.async {
             UserDefaults.standard.removeObject(forKey: "UserToken")
             UserDefaults.standard.set(false, forKey: "isLoggedIn")
+            UserDefaults.standard.removeObject(forKey: "UserRegisterType")
             
             // 切换到登录页
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,

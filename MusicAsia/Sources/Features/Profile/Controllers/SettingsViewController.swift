@@ -463,6 +463,8 @@ class SettingsViewController: BaseViewController {
     private func executeLogout() {
         // 清空 Token 和状态
         UserDefaults.standard.set(false, forKey: "isLoggedIn")
+        UserDefaults.standard.removeObject(forKey: "UserToken")
+        UserDefaults.standard.removeObject(forKey: "UserRegisterType")
         
         // 切换根视图到登录页
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,

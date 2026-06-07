@@ -79,7 +79,7 @@ class BluetoothManager: NSObject {
     }
     
     private func performGetBluetoothName(completion: @escaping (String?) -> Void) {
-        // 1. 先尝试从系统音频路由获取
+        // 1. 先尝试从系统音频路由获取（这是真正连接并作为音频输出的蓝牙设备）
         forceWakeupAudioRoute()
         let currentRoute = AVAudioSession.sharedInstance().currentRoute
         for output in currentRoute.outputs {
@@ -92,30 +92,8 @@ class BluetoothManager: NSObject {
             }
         }
         
-        // 2. 如果系统路由没拿到，看 CoreBluetooth 之前是否扫描到了设备
-        if let firstScanned = scannedPeripherals.first(where: { $0.name != nil }) {
-            cachedBluetoothName = firstScanned.name
-            completion(firstScanned.name)
-            return
-        }
-        
-        // 3. 如果什么都没拿到，启动扫描等一会儿 (0.5秒)，然后再检查一次
-        if centralManager.state == .poweredOn {
-            scannedPeripherals.removeAll()
-            centralManager.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.centralManager.stopScan()
-                if let firstScanned = self?.scannedPeripherals.first(where: { $0.name != nil }) {
-                    self?.cachedBluetoothName = firstScanned.name
-                    completion(firstScanned.name)
-                } else {
-                    completion(nil)
-                }
-            }
-        } else {
-            completion(nil)
-        }
+        // 如果系统音频路由中没有蓝牙设备，说明当前没有连接蓝牙音频设备
+        completion(nil)
     }
 }
 

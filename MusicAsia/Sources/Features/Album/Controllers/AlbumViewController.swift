@@ -8,6 +8,7 @@ class AlbumViewController: BaseViewController {
     private let searchTextField = UITextField()
     
     private var collectionView: UICollectionView!
+    private let refreshControl = UIRefreshControl()
     
     // Pagination footer
     private let footerView = UIView()
@@ -28,6 +29,8 @@ class AlbumViewController: BaseViewController {
     private var isDownloading = false
     private var downloadPopup: DownloadProgressView?
     
+    private var currentSearchKeyword: String = ""
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,6 +62,9 @@ class AlbumViewController: BaseViewController {
         
         let searchIcon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
         searchIcon.tintColor = UIColor(hex: "#16E0BF")
+        searchIcon.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleSearchIconTapped))
+        searchIcon.addGestureRecognizer(tapGesture)
         searchContainer.addSubview(searchIcon)
         
         searchContainer.snp.makeConstraints { make in
@@ -92,6 +98,10 @@ class AlbumViewController: BaseViewController {
         collectionView.dataSource = self
         collectionView.register(AlbumGridCell.self, forCellWithReuseIdentifier: "AlbumGridCell")
         view.addSubview(collectionView)
+        
+        refreshControl.tintColor = UIColor(hex: "#16E0BF")
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
         
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(searchContainer.snp.bottom).offset(20)
@@ -131,17 +141,22 @@ class AlbumViewController: BaseViewController {
         loadPageData()
     }
     
+    @objc private func handleRefresh() {
+        loadInitialData()
+    }
+    
     private func loadPageData() {
         print("AlbumViewController: loadPageData() page \(currentPage)")
-        let searchText = searchTextField.text ?? ""
+        let searchText = currentSearchKeyword
         
-        if currentPage == 1 {
+        if currentPage == 1 && !refreshControl.isRefreshing {
             showLoading()
         }
         
         AlbumAPI.getAlbums(pageNum: currentPage, pageSize: pageSize, collectionName: searchText) { [weak self] result in
             guard let self = self else { return }
             self.hideLoading()
+            self.refreshControl.endRefreshing()
             switch result {
             case .success(let pageResponse):
                 let newAlbums = pageResponse.data?.voList ?? []
@@ -195,21 +210,70 @@ class AlbumViewController: BaseViewController {
     }
     
     private func performSearch(keyword: String) {
+        currentSearchKeyword = keyword
         isSearching = !keyword.isEmpty
         currentPage = 1
         hasMoreData = true
         loadPageData()
     }
     
+    @objc private func handleSearchIconTapped() {
+        searchTextField.resignFirstResponder()
+        performSearch(keyword: searchTextField.text ?? "")
+    }
+    
     // MARK: - Action A: Download & Favorite
     private func handleDownload(for album: Album) {
-        // A1 -> A6 鉴权检查
+        showLoading()
+        
+        // 1. 获取该专辑的所有歌曲
+        SongAPI.getSongs(pageNum: 1, pageSize: 1000, collectionName: album.name) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let pageResponse):
+                let songs = pageResponse.data?.voList ?? []
+                if songs.isEmpty {
+                    self.hideLoading()
+                    self.showAlert(message: "该专辑暂无歌曲")
+                    return
+                }
+                
+                // 2. 遍历收藏专辑里的所有歌曲
+                let group = DispatchGroup()
+                for song in songs {
+                    // 如果还没有收藏，则调用收藏接口 (type: "1" 表示单曲)
+                    if song.userIsCollect == false {
+                        group.enter()
+                        SongAPI.collectSong(collectionSongsId: song.collectionSongsId ?? 0, type: "1", collectionName: nil) { _ in
+                            group.leave()
+                        }
+                    }
+                }
+                
+                // 所有歌曲收藏完成后
+                group.notify(queue: .main) {
+                    self.hideLoading()
+                    // 3. 收藏完成后静默检查 U 盘权限
+                    self.checkPermissionAndDownload(album: album)
+                }
+                
+            case .failure(let error):
+                self.hideLoading()
+                self.showAlert(message: "获取专辑歌曲失败: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func checkPermissionAndDownload(album: Album) {
+        // A1 -> A6 鉴权检查 (U 盘与会员等权限)
         UfiManager.shared.checkDownloadPermission { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success:
                 self.startDownloadProcess(for: album)
             case .failure(let error):
+                // 提示用户需要插入 U 盘，同时阻断后续的下载弹窗
                 self.showAlert(message: error.localizedDescription)
             }
         }
@@ -219,45 +283,35 @@ class AlbumViewController: BaseViewController {
         if isDownloading { return }
         isDownloading = true
         
-        // A7. 将此专辑的所有歌曲进行收藏 (调用收藏接口 type: 2 表示专辑)
-        guard let albumIdInt = Int(album.id) else {
-            isDownloading = false
-            return
-        }
-        
-        SongAPI.collectSong(collectionSongsId: albumIdInt, type: "2", collectionName: album.name) { [weak self] result in
+        // A8. 请求此专辑的所有歌曲
+        SongAPI.getSongs(pageNum: 1, pageSize: 1000, collectionName: album.name) { [weak self] songResult in
             guard let self = self else { return }
-            // 不论收藏接口是否报错（可能已收藏），都继续去拿专辑歌曲列表
-            // A8. 请求此专辑的所有歌曲
-            SongAPI.getSongs(pageNum: 1, pageSize: 1000, collectionName: album.name) { [weak self] songResult in
-                guard let self = self else { return }
-                switch songResult {
-                case .success(let pageResponse):
-                    let apiSongs = pageResponse.data?.voList ?? []
-                    if apiSongs.isEmpty {
-                        self.isDownloading = false
-                        self.showAlert(message: "该专辑暂无歌曲")
-                        return
-                    }
-                    
-                    // 转换为 UI 模型
-                    let songs = apiSongs.map { song in
-                        Song(id: "\(song.collectionSongsId ?? 0)",
-                             name: song.songName ?? "未知歌曲",
-                             artist: song.singer ?? "未知歌手",
-                             source: (song.songNameSecret?.hasPrefix("http") == true) ? .changba : .unicom,
-                             url: song.songNameSecret ?? "",
-                             isFavorited: song.userIsCollect ?? true, // 刚收藏过
-                             isPlaying: false,
-                             isDownloaded: false)
-                    }
-                    
-                    self.showDownloadPopup(with: songs)
-                    
-                case .failure(let error):
+            switch songResult {
+            case .success(let pageResponse):
+                let apiSongs = pageResponse.data?.voList ?? []
+                if apiSongs.isEmpty {
                     self.isDownloading = false
-                    self.showAlert(message: "获取专辑歌曲失败: \(error.localizedDescription)")
+                    self.showAlert(message: "该专辑暂无歌曲可供下载")
+                    return
                 }
+                
+                // 转换为 UI 模型
+                let songs = apiSongs.map { song in
+                    Song(id: "\(song.collectionSongsId ?? 0)",
+                         name: song.songName ?? "未知歌曲",
+                         artist: song.singer ?? "未知歌手",
+                         source: (song.songNameSecret?.hasPrefix("http") == true) ? .changba : .unicom,
+                         url: song.songNameSecret ?? "",
+                         isFavorited: song.userIsCollect ?? true, // 刚收藏过
+                         isPlaying: false,
+                         isDownloaded: false)
+                }
+                
+                self.showDownloadPopup(with: songs)
+                
+            case .failure(let error):
+                self.isDownloading = false
+                self.showAlert(message: "获取专辑歌曲失败: \(error.localizedDescription)")
             }
         }
     }
@@ -380,17 +434,17 @@ extension AlbumViewController: UITextFieldDelegate {
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        // 实时搜索
-        if let text = textField.text,
-           let textRange = Range(range, in: text) {
-            let updatedText = text.replacingCharacters(in: textRange, with: string)
+        let currentText = textField.text ?? ""
+        if let textRange = Range(range, in: currentText) {
+            let updatedText = currentText.replacingCharacters(in: textRange, with: string)
             performSearch(keyword: updatedText)
         }
         return true
     }
     
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        textField.text = ""
         performSearch(keyword: "")
-        return true
+        return false
     }
 }

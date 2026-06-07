@@ -5,6 +5,7 @@ class HomeViewController: BaseViewController {
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+    private let refreshControl = UIRefreshControl()
     
     private let adsStack = UIStackView()
     private let songsContainer = UIView()
@@ -38,6 +39,10 @@ class HomeViewController: BaseViewController {
             make.edges.width.equalToSuperview()
         }
         
+        refreshControl.tintColor = UIColor(hex: "#16E0BF")
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        scrollView.refreshControl = refreshControl
+        
         // 1. Ads Section (A. 广告图)
         adsStack.axis = .horizontal
         adsStack.spacing = 15
@@ -50,6 +55,26 @@ class HomeViewController: BaseViewController {
         
         let ad1 = AdCardView(title: "", imageUrl: "banner_singing_image")
         let ad2 = AdCardView(title: "", imageUrl: "banner_film_image")
+        
+        ad1.onTap = { [weak self] in
+            self?.showAlert(message: "唱吧APP暂不支持IOS系统")
+        }
+        
+        ad2.onTap = { [weak self] in
+            // 5G宽视界跳转逻辑
+            let appScheme = "kuanshijie://" // 请根据实际情况修改 project.yml 中的白名单
+            let fallbackUrl = "https://webwotv.chinaunicomvideo.cn/wovideo/wotvStarKaraoke/index.html#/subject/catauto1111130298?reflectionId=ACT0580848008&channel=xnkg"
+            
+            if let schemeURL = URL(string: appScheme), UIApplication.shared.canOpenURL(schemeURL) {
+                UIApplication.shared.open(schemeURL, options: [:], completionHandler: nil)
+            } else {
+                self?.showAlert(message: "5G宽视界未安装，请前往安装，谢谢") {
+                    if let webURL = URL(string: fallbackUrl) {
+                        UIApplication.shared.open(webURL, options: [:], completionHandler: nil)
+                    }
+                }
+            }
+        }
         
         // 保证广告位宽高比 1:1（正方形）
         ad1.snp.makeConstraints { make in
@@ -105,10 +130,13 @@ class HomeViewController: BaseViewController {
     
     private func loadData() {
         print("HomeViewController: loadData() start")
-        showLoading()
+        if !refreshControl.isRefreshing {
+            showLoading()
+        }
         HomeAPI.getIndex { [weak self] result in
             guard let self = self else { return }
             self.hideLoading()
+            self.refreshControl.endRefreshing()
             switch result {
             case .success(let indexResp):
                 self.handleIndexData(indexResp)
@@ -116,6 +144,10 @@ class HomeViewController: BaseViewController {
                 self.showAlert(message: "获取首页数据失败: \(error.localizedDescription)")
             }
         }
+    }
+    
+    @objc private func handleRefresh() {
+        loadData()
     }
     
     private func handleIndexData(_ data: IndexResp) {
@@ -254,6 +286,7 @@ class HomeViewController: BaseViewController {
             songName: songName,
             songSecret: secret,
             isDownloaded: false, // 首页未获取下载状态
+            isTrial: true,       // 首页歌曲属于试听歌曲，跳过会员验证
             in: self
         ) {
             // 播放成功后的 UI 状态更新（如需要）

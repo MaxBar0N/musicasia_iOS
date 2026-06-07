@@ -21,6 +21,7 @@
 		3526DE32DF2CF528AF905770 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D653D9455FC3C060162CF46D /* ProfileViewController.swift */; };
 		36416EFA8E8F387B303CD396 /* HomeAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F478B6CBF8ACA629BC053AD /* HomeAPI.swift */; };
 		37F7919E2BB9D7A5A2B7FE7F /* DeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29FE1877E1DEC55892BD832A /* DeviceViewController.swift */; };
+		3A854CE1ED6ACCEE49D6E095 /* CommonAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E6E8BBDFAB5E82AB5CC143 /* CommonAPI.swift */; };
 		470C7E8170AF47EA06530DB9 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24029B95D7BD5F908F185CBF /* NetworkManager.swift */; };
 		52F7836B31EF5CD0F1B44F4D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9166042D1390307B44CC30F /* Assets.xcassets */; };
 		53BFF3133033C91943257E6C /* UIColor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2883DBD7073FA39B3DEC4330 /* UIColor+Extension.swift */; };
@@ -82,6 +83,7 @@
 		3F893414F03439E4B67AD217 /* AgreementViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgreementViewController.swift; sourceTree = "<group>"; };
 		44DD6DC1205722B2DD171DC4 /* SongModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongModels.swift; sourceTree = "<group>"; };
 		4E29D228459C9E4A1850254E /* SongAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongAPI.swift; sourceTree = "<group>"; };
+		59E6E8BBDFAB5E82AB5CC143 /* CommonAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonAPI.swift; sourceTree = "<group>"; };
 		5DEE6CBCD45F7F4DF7EF3DA5 /* DeviceViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceViews.swift; sourceTree = "<group>"; };
 		6416A5CBA7434B850C790C67 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 		7E2C25F49941EB4459FF0A9A /* AlbumViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViews.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 			children = (
 				0EC10496ADBAE8C8ED38B9F1 /* AlbumAPI.swift */,
 				9F633995977EF314EEA8866A /* AuthAPI.swift */,
+				59E6E8BBDFAB5E82AB5CC143 /* CommonAPI.swift */,
 				3EF4EB5DB8128F2C8F611F61 /* DeviceAPI.swift */,
 				1F478B6CBF8ACA629BC053AD /* HomeAPI.swift */,
 				E3182EB0F77D62EF07DCC880 /* OrderAPI.swift */,
@@ -571,6 +574,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					E9E32431D1449178AA1EE151 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = B0969B00E6876266FB7C1776 /* Build configuration list for PBXProject "MusicAsia" */;
 			developmentRegion = en;
@@ -624,6 +632,7 @@
 				B5B7AF0B7F2E71AD3F491ACE /* AuthAPI.swift in Sources */,
 				22D33FFBD5A77FAB1B954299 /* BaseViewController.swift in Sources */,
 				994A7D61C2ACE86DCEA3D585 /* BluetoothManager.swift in Sources */,
+				3A854CE1ED6ACCEE49D6E095 /* CommonAPI.swift in Sources */,
 				2FB069C56A5A4C2BC6F92488 /* CustomAlertView.swift in Sources */,
 				163FFE2A552F4A714DFCBFA3 /* DeviceAPI.swift in Sources */,
 				CED1E1BE0BF769B50B752105 /* DeviceModels.swift in Sources */,
@@ -671,6 +680,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8YTMMELJ57;
 				INFOPLIST_FILE = MusicAsia/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -688,6 +698,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8YTMMELJ57;
 				INFOPLIST_FILE = MusicAsia/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

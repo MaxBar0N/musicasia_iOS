@@ -1,6 +1,5 @@
 name: MusicAsia
 options:
-  bundleIdPrefix: com.musicasia
   deploymentTarget:
     iOS: 14.0
 
@@ -19,6 +18,11 @@ targets:
   MusicAsia:
     type: application
     platform: iOS
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: cn.musicasia.singword
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: "" # Xcode会自动管理，或者你可以填入你的Team ID
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     sources: 
       - path: MusicAsia/Sources
       - path: MusicAsia/Resources
@@ -29,7 +33,12 @@ targets:
     info:
       path: MusicAsia/Info.plist
       properties:
-        UILaunchScreen: {}
+        CFBundleDevelopmentRegion: "zh_CN"
+        CFBundleLocalizations:
+          - "zh_CN"
+        UILaunchScreen:
+          UIImageName: "login_logo_icon"
+          UIColorName: "LaunchBackgroundColor"
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
           UISceneConfigurations:
@@ -37,6 +46,7 @@ targets:
               - UISceneConfigurationName: Default Configuration
                 UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
         NSCameraUsageDescription: "扫描二维码需要使用您的相机"
+        NSPhotoLibraryAddUsageDescription: "我们需要您的同意才能将二维码保存到相册"
         NSBluetoothAlwaysUsageDescription: "连接音乐外设需要使用您的蓝牙"
         NSBluetoothPeripheralUsageDescription: "连接音乐外设需要使用您的蓝牙"
         UIFileSharingEnabled: true
@@ -45,3 +55,9 @@ targets:
           NSAllowsArbitraryLoads: true
         UIBackgroundModes:
           - audio
+        LSApplicationQueriesSchemes:
+          - weixin
+          - weixinULAPI
+          - alipay
+          - alipayshare
+          - kuanshijie

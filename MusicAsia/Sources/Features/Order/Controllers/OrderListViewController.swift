@@ -5,6 +5,7 @@ class OrderListViewController: BaseViewController {
     
     // MARK: - UI
     private let scrollView = UIScrollView()
+    private let refreshControl = UIRefreshControl()
     private let contentView = UIView()
     private let ordersStack = UIStackView()
     
@@ -39,6 +40,10 @@ class OrderListViewController: BaseViewController {
         scrollView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
+        
+        refreshControl.tintColor = UIColor(hex: "#16E0BF")
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        scrollView.refreshControl = refreshControl
         
         scrollView.addSubview(contentView)
         contentView.snp.makeConstraints { make in
@@ -88,12 +93,16 @@ class OrderListViewController: BaseViewController {
         loadPageData()
     }
     
+    @objc private func handleRefresh() {
+        loadInitialData()
+    }
+    
     private func loadPageData() {
         if isLoading { return }
         isLoading = true
         print("OrderListViewController: loadPageData() page \(currentPage)")
         
-        if currentPage == 1 {
+        if currentPage == 1 && !refreshControl.isRefreshing {
             showLoading()
         }
         
@@ -101,6 +110,7 @@ class OrderListViewController: BaseViewController {
             guard let self = self else { return }
             self.isLoading = false
             self.hideLoading()
+            self.refreshControl.endRefreshing()
             switch result {
             case .success(let pageResponse):
                 let orders = pageResponse.data?.voList ?? []

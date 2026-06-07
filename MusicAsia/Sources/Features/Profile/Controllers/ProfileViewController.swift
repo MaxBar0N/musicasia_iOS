@@ -38,6 +38,7 @@ class ProfileViewController: BaseViewController {
         super.viewDidLoad()
         setupUI()
         NotificationCenter.default.addObserver(self, selector: #selector(playerStateChanged), name: NSNotification.Name("PlayerStateChanged"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(collectionChanged), name: NSNotification.Name("UserCollectionChanged"), object: nil)
     }
     
     deinit {
@@ -429,6 +430,10 @@ class ProfileViewController: BaseViewController {
     }
     
     // MARK: - Actions
+    @objc private func collectionChanged() {
+        needsRefresh = true
+    }
+    
     @objc private func handleSettings() {
         let settingsVC = SettingsViewController()
         settingsVC.hidesBottomBarWhenPushed = true

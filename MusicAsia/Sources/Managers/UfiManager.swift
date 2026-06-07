@@ -5,7 +5,7 @@ class UfiManager {
     static let shared = UfiManager()
     
     // 模拟状态
-    var isConnected: Bool = true
+    var isConnected: Bool = false // 默认未连接U盘
     var isDeviceValid: Bool = true
     var isActivated: Bool = false
     var activatorId: String? = nil

@@ -130,6 +130,8 @@ class LoginViewController: BaseViewController {
         loginButton.setTitle("登录", for: .normal)
         registerButton.setTitle("注册", for: .normal)
         
+        registerButton.customCornerRadius = 24
+        
         let stackView = UIStackView(arrangedSubviews: [loginButton, registerButton])
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -161,13 +163,17 @@ class LoginViewController: BaseViewController {
         startCountdown()
         
         AuthAPI.sendLoginCode(phone: phone) { [weak self] result in
-            switch result {
-            case .success(let data):
-                print("验证码发送成功: \(data ?? "")")
-                self?.showAlert(message: "验证码已发送，请注意查收")
-            case .failure(let error):
-                self?.showAlert(message: "验证码发送失败: \(error.localizedDescription)")
-                self?.stopTimer()
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("验证码发送成功")
+                    self?.showAlert(message: "验证码已发送，请注意查收")
+                case .failure(let error):
+                    // 如果提示后端异常或类似错误，有可能是验证码发送成功但是返回的类型不匹配或者第一次缓存问题
+                    // 这里我们为了用户体验，遇到非严重的报错时仅弹窗提示但不直接停止倒计时，让用户可以尝试重试
+                    self?.showAlert(message: "验证码发送异常: \(error.localizedDescription)")
+                    self?.stopTimer()
+                }
             }
         }
     }
@@ -181,25 +187,48 @@ class LoginViewController: BaseViewController {
         
         print("正在尝试登录...")
         AuthAPI.login(phone: phone, code: code) { [weak self] result in
-            switch result {
-            case .success(let token):
-                print("登录成功，Token: \(token ?? "")")
-                if let token = token, !token.isEmpty {
-                    UserDefaults.standard.set(token, forKey: "UserToken")
-                }
-                self?.navigateToHome()
-            case .failure(let error):
-                if case .serverError(_, let msg) = error {
-                    // 如果提示未注册或其他业务错误
-                    if msg.contains("不存在") || msg.contains("未注册") {
-                        self?.showAlert(message: "账号不存在，请先注册") {
-                            self?.handleRegister()
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let token):
+                    print("登录成功，Token: \(token ?? "")")
+                    if let token = token, !token.isEmpty {
+                        UserDefaults.standard.set(token, forKey: "UserToken")
+                    }
+                    
+                    // 登录成功后立刻拉取个人信息以获取正确的账户类型 (商家/个人)
+                    ProfileAPI.getUserInfo { [weak self] infoResult in
+                        if case .success(let userDetail) = infoResult {
+                            print("============= getInfo 解析后的 agentId =============")
+                            print("agentId: \(String(describing: userDetail.agentId))")
+                            print("==================================================")
+                            
+                            if userDetail.agentId != nil {
+                                UserDefaults.standard.set("BUSINESS", forKey: "UserRegisterType")
+                            } else {
+                                UserDefaults.standard.set("PERSON", forKey: "UserRegisterType")
+                            }
+                        } else {
+                            UserDefaults.standard.set("PERSON", forKey: "UserRegisterType")
+                        }
+                        
+                        DispatchQueue.main.async {
+                            self?.navigateToHome()
+                        }
+                    }
+                    
+                case .failure(let error):
+                    if case .serverError(_, let msg) = error {
+                        // 如果提示未注册或其他业务错误
+                        if msg.contains("不存在") || msg.contains("未注册") {
+                            self?.showAlert(message: "账号不存在，请先注册") {
+                                self?.handleRegister()
+                            }
+                        } else {
+                            self?.showAlert(message: "登录失败: \(msg)")
                         }
                     } else {
-                        self?.showAlert(message: "登录失败: \(msg)")
+                        self?.showAlert(message: "登录失败: \(error.localizedDescription)")
                     }
-                } else {
-                    self?.showAlert(message: "登录失败: \(error.localizedDescription)")
                 }
             }
         }

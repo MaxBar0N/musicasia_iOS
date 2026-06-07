@@ -95,7 +95,7 @@ class GradientBorderButton: UIButton {
         super.layoutSubviews()
         gradientLayer.frame = bounds
         
-        let cornerRadius: CGFloat = customCornerRadius ?? 8
+        let cornerRadius: CGFloat = customCornerRadius ?? (bounds.height / 2)
         // 路径需要向内缩进线宽的一半，否则边框会被裁剪
         let path = UIBezierPath(roundedRect: bounds.insetBy(dx: 1.0, dy: 1.0), cornerRadius: cornerRadius)
         shapeLayer.path = path.cgPath

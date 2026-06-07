@@ -53,6 +53,7 @@ class PurchaseViewController: BaseViewController {
             switch dictResult {
             case .success(let dictList):
                 let userType = UserDefaults.standard.string(forKey: "UserRegisterType") ?? "PERSON"
+                print("当前使用的 UserRegisterType 缓存: \(userType)")
                 
                 for dict in dictList {
                     guard let label = dict.dictLabel, let value = dict.dictValue else { continue }

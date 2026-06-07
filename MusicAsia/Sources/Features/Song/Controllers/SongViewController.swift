@@ -12,6 +12,7 @@ class SongViewController: BaseViewController {
     private var tabButtons: [UIButton] = []
     
     private let scrollView = UIScrollView()
+    private let refreshControl = UIRefreshControl()
     private let contentView = UIView()
     private let songsStack = UIStackView()
     
@@ -34,6 +35,8 @@ class SongViewController: BaseViewController {
     var sourceAlbumId: String?
     var sourceAlbumName: String?
     
+    private var currentSearchKeyword: String = ""
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,6 +77,9 @@ class SongViewController: BaseViewController {
         
         let searchIcon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
         searchIcon.tintColor = UIColor(hex: "#16E0BF")
+        searchIcon.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleSearchIconTapped))
+        searchIcon.addGestureRecognizer(tapGesture)
         searchContainer.addSubview(searchIcon)
         
         searchContainer.snp.makeConstraints { make in
@@ -132,6 +138,10 @@ class SongViewController: BaseViewController {
             make.left.right.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
+        refreshControl.tintColor = UIColor(hex: "#16E0BF")
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        scrollView.refreshControl = refreshControl
+        
         scrollView.addSubview(contentView)
         contentView.snp.makeConstraints { make in
             make.edges.width.equalToSuperview()
@@ -170,6 +180,11 @@ class SongViewController: BaseViewController {
     }
     
     // MARK: - Tab Logic
+    @objc private func handleSearchIconTapped() {
+        searchTextField.resignFirstResponder()
+        performSearch(keyword: searchTextField.text ?? "")
+    }
+    
     @objc private func tabTapped(_ sender: UIButton) {
         if isSearching {
             // 搜索状态下点击 tab，清空搜索
@@ -209,17 +224,22 @@ class SongViewController: BaseViewController {
         loadPageData()
     }
     
+    @objc private func handleRefresh() {
+        loadInitialData()
+    }
+    
     private func loadPageData() {
         print("SongViewController: loadPageData() page \(currentPage) for category \(currentCategory)")
-        let searchText = searchTextField.text ?? ""
+        let searchText = currentSearchKeyword
         
-        if currentPage == 1 {
+        if currentPage == 1 && !refreshControl.isRefreshing {
             showLoading()
         }
         
         let completion: (Result<BasePageResponse<CollectionSongsResp>, NetworkError>) -> Void = { [weak self] result in
             guard let self = self else { return }
             self.hideLoading()
+            self.refreshControl.endRefreshing()
             
             switch result {
             case .success(let pageResponse):
@@ -322,9 +342,11 @@ class SongViewController: BaseViewController {
     }
     
     private func performSearch(keyword: String) {
+        currentSearchKeyword = keyword
+        
         if keyword.isEmpty {
             isSearching = false
-            // 恢复当前 Tab
+            // 恢复当前 Tab 数据
             if let index = tabButtons.firstIndex(where: { $0.titleLabel?.font.pointSize == 18 }) {
                 switchTab(index: index)
             } else {
@@ -332,15 +354,14 @@ class SongViewController: BaseViewController {
             }
         } else {
             isSearching = true
-            // 搜索时不关联专辑，搜索全部
-            loadInitialData()
-            
-            // 将 Tab 全部置灰
-            for btn in tabButtons {
-                btn.setTitleColor(UIColor.white.withAlphaComponent(0.6), for: .normal)
-                btn.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
+            // 搜索时强制高亮猜你喜欢 Tab（index 0）
+            if currentCategory != .guess {
+                switchTab(index: 0)
+            } else {
+                loadInitialData()
             }
-            tabIndicator.isHidden = true
+            
+            tabIndicator.isHidden = false
         }
     }
     
@@ -396,17 +417,19 @@ extension SongViewController: UITextFieldDelegate, UIScrollViewDelegate {
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if let text = textField.text, let textRange = Range(range, in: text) {
-            let updatedText = text.replacingCharacters(in: textRange, with: string)
+        let currentText = textField.text ?? ""
+        if let textRange = Range(range, in: currentText) {
+            let updatedText = currentText.replacingCharacters(in: textRange, with: string)
             performSearch(keyword: updatedText)
         }
         return true
     }
     
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        textField.text = ""
         performSearch(keyword: "")
         tabIndicator.isHidden = false
-        return true
+        return false
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

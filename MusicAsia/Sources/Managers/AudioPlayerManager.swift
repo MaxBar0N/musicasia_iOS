@@ -2,7 +2,6 @@ import Foundation
 import AVFoundation
 import UIKit
 
-/// 音频播放管理器，封装原生 AVPlayer
 class AudioPlayerManager {
     static let shared = AudioPlayerManager()
     
@@ -14,7 +13,6 @@ class AudioPlayerManager {
     }
     
     private init() {
-        // 配置音频会话，支持后台播放
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
@@ -67,15 +65,16 @@ class SongPlaybackManager {
     ///   - songName: 歌曲名称
     ///   - songSecret: 歌曲链接或加密串
     ///   - isDownloaded: 是否已下载
+    ///   - isTrial: 是否为试听歌曲（跳过VIP鉴权）
     ///   - viewController: 所在的控制器，用于弹窗
     ///   - onSuccess: 鉴权通过并准备开始播放时的回调（用于更新UI状态）
     func playSong(songName: String,
                   songSecret: String,
                   isDownloaded: Bool = false,
+                  isTrial: Bool = false,
                   in viewController: UIViewController,
                   onSuccess: (() -> Void)? = nil) {
         
-        // 如果点击的是当前正在播放的歌曲，就执行暂停/播放切换
         if currentSongSecret == songSecret {
             if AudioPlayerManager.shared.isPlaying {
                 AudioPlayerManager.shared.pause()
@@ -88,41 +87,55 @@ class SongPlaybackManager {
         
         print("准备播放: \(songName)")
         
-        // 1. VIP 校验
-        ProfileAPI.checkUserEndTime { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let resp):
-                    if resp.hasPermission != true {
-                        self?.showAlert(message: resp.msg ?? "会员已过期，请前往“我的”里面进行续费，谢谢", in: viewController)
-                        return
-                    }
-                    
-                    BluetoothManager.shared.getAvailableBluetoothName { [weak self] bluetoothName in
-                        DispatchQueue.main.async {
-                            if !BluetoothManager.shared.isBluetoothPoweredOn {
-                                let alert = UIAlertController(title: "提示", message: "请在系统设置中打开蓝牙并允许App使用蓝牙权限", preferredStyle: .alert)
-                                alert.addAction(UIAlertAction(title: "取消", style: .cancel))
-                                alert.addAction(UIAlertAction(title: "去设置", style: .default, handler: { _ in
-                                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                                        UIApplication.shared.open(url)
-                                    }
-                                }))
-                                viewController.present(alert, animated: true)
-                                return
-                            }
-                            
-                            guard let name = bluetoothName, !name.isEmpty else {
-                                self?.showAlert(message: "当前设备未进行蓝牙连接，无法播放歌曲", in: viewController)
-                                return
-                            }
-                            
-                            self?.checkBluetoothPermission(mac: name, name: name, songName: songName, songSecret: songSecret, isDownloaded: isDownloaded, onSuccess: onSuccess, viewController: viewController)
+        if isTrial {
+            self.checkBluetoothAndPlay(songName: songName, songSecret: songSecret, isDownloaded: isDownloaded, isTrial: isTrial, onSuccess: onSuccess, viewController: viewController)
+        } else {
+            ProfileAPI.checkUserEndTime { [weak self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let resp):
+                        if resp.hasPermission != true {
+                            self?.showAlert(message: resp.msg ?? "会员已过期，请前往“我的”里面进行续费，谢谢", in: viewController)
+                            return
                         }
+                        
+                        self?.checkBluetoothAndPlay(songName: songName, songSecret: songSecret, isDownloaded: isDownloaded, isTrial: isTrial, onSuccess: onSuccess, viewController: viewController)
+                        
+                    case .failure(let error):
+                        self?.showAlert(message: "会员校验失败: \(error.localizedDescription)", in: viewController)
                     }
-                    
-                case .failure(let error):
-                    self?.showAlert(message: "会员校验失败: \(error.localizedDescription)", in: viewController)
+                }
+            }
+        }
+    }
+    
+    private func checkBluetoothAndPlay(songName: String, songSecret: String, isDownloaded: Bool, isTrial: Bool, onSuccess: (() -> Void)?, viewController: UIViewController) {
+        BluetoothManager.shared.getAvailableBluetoothName { [weak self] bluetoothName in
+            DispatchQueue.main.async {
+                if !BluetoothManager.shared.isBluetoothPoweredOn {
+                    let alert = UIAlertController(title: "提示", message: "请在系统设置中打开蓝牙并允许App使用蓝牙权限", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+                    alert.addAction(UIAlertAction(title: "去设置", style: .default, handler: { _ in
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }))
+                    viewController.present(alert, animated: true)
+                    return
+                }
+                
+                guard let name = bluetoothName, !name.isEmpty else {
+                    self?.showAlert(message: "当前设备未进行蓝牙连接，无法播放歌曲", in: viewController)
+                    return
+                }
+                
+                if isTrial {
+                    self?.currentSongName = songName
+                    self?.currentSongSecret = songSecret
+                    onSuccess?()
+                    self?.executePlay(songName: songName, songSecret: songSecret, isDownloaded: isDownloaded, in: viewController)
+                } else {
+                    self?.checkBluetoothPermission(mac: name, name: name, songName: songName, songSecret: songSecret, isDownloaded: isDownloaded, onSuccess: onSuccess, viewController: viewController)
                 }
             }
         }
@@ -149,15 +162,12 @@ class SongPlaybackManager {
     }
     
     private func executePlay(songName: String, songSecret: String, isDownloaded: Bool, in viewController: UIViewController) {
-        // 4. 检查本地下载
         if isDownloaded {
             print("💿 播放本地下载文件: \(songName)")
-            // 模拟本地播放，展示弹窗
             self.showPlayerPopup(songName: songName, url: "local_file_path", in: viewController)
             return
         }
         
-        // 5. 唱吧直链与联通解密区分
         let isChangba = songSecret.hasPrefix("http")
         
         if isChangba {
@@ -187,7 +197,6 @@ class SongPlaybackManager {
     }
     
     private func showPlayerPopup(songName: String, url: String, in viewController: UIViewController) {
-        // 使用全局悬浮播放面板
         DispatchQueue.main.async {
             GlobalFloatPlayerView.shared.show(songName: songName)
         }
@@ -257,7 +266,6 @@ class GlobalFloatPlayerView: UIView {
         closeButton.addTarget(self, action: #selector(closeAction), for: .touchUpInside)
         containerView.addSubview(closeButton)
         
-        // Initial expanded layout
         containerView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
@@ -292,9 +300,7 @@ class GlobalFloatPlayerView: UIView {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         self.addGestureRecognizer(panGesture)
     }
-    
-    // MARK: - Actions
-    
+        
     @objc private func handleStateChanged() {
         updatePlayState(isPlaying: AudioPlayerManager.shared.isPlaying)
     }
@@ -307,7 +313,6 @@ class GlobalFloatPlayerView: UIView {
             AudioPlayerManager.shared.resume()
             playPauseButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         }
-        // Notification to update list UI if needed
         NotificationCenter.default.post(name: NSNotification.Name("PlayerStateChanged"), object: nil)
     }
     
@@ -376,7 +381,6 @@ class GlobalFloatPlayerView: UIView {
             self.center = CGPoint(x: self.center.x + translation.x, y: self.center.y + translation.y)
             gesture.setTranslation(.zero, in: superview)
         } else if gesture.state == .ended || gesture.state == .cancelled {
-            // Stick to edge
             let safeArea = superview.safeAreaInsets
             let padding: CGFloat = 16
             
@@ -397,9 +401,7 @@ class GlobalFloatPlayerView: UIView {
             }, completion: nil)
         }
     }
-    
-    // MARK: - Public Methods
-    
+        
     func show(songName: String) {
         self.currentSongName = songName
         self.titleLabel.text = songName

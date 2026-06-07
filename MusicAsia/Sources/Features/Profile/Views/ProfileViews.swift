@@ -390,10 +390,20 @@ class CustomerServicePopupView: UIView {
         let qrImageView = UIImageView()
         qrImageView.backgroundColor = .white
         qrImageView.layer.cornerRadius = 8
-        qrImageView.image = UIImage(systemName: "qrcode")
-        qrImageView.tintColor = .black
-        qrImageView.contentMode = .scaleAspectFit
+        if let qrImage = UIImage(named: "customer_service_qr_code") {
+            qrImageView.image = qrImage
+            qrImageView.contentMode = .scaleAspectFill
+        } else {
+            qrImageView.image = UIImage(systemName: "qrcode")
+            qrImageView.tintColor = .black
+            qrImageView.contentMode = .scaleAspectFit
+        }
+        qrImageView.clipsToBounds = true
+        qrImageView.isUserInteractionEnabled = true
         containerView.addSubview(qrImageView)
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        qrImageView.addGestureRecognizer(longPress)
         
         let hintLabel = UILabel()
         hintLabel.text = "请识别二维码联系微信客服"
@@ -452,6 +462,57 @@ class CustomerServicePopupView: UIView {
     @objc func hide() {
         UIView.animate(withDuration: 0.3, animations: { self.alpha = 0 }) { _ in
             self.removeFromSuperview()
+        }
+    }
+    
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        guard let imageView = gesture.view as? UIImageView, let image = imageView.image else { return }
+        
+        let alert = UIAlertController(title: "保存图片", message: "是否将客服二维码保存到相册？", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "保存", style: .default, handler: { _ in
+            UIImageWriteToSavedPhotosAlbum(image, self, #selector(self.image(_:didFinishSavingWithError:contextInfo:)), nil)
+        }))
+        
+        // Find top view controller to present alert
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            var topVC = rootVC
+            while let presentedVC = topVC.presentedViewController {
+                topVC = presentedVC
+            }
+            topVC.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    @objc private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        let msg = (error == nil) ? "保存成功" : "保存失败：\(error!.localizedDescription)"
+        
+        // Simple toast
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            let toast = UILabel()
+            toast.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+            toast.textColor = .white
+            toast.textAlignment = .center
+            toast.font = .systemFont(ofSize: 14)
+            toast.text = msg
+            toast.layer.cornerRadius = 8
+            toast.clipsToBounds = true
+            
+            window.addSubview(toast)
+            toast.snp.makeConstraints { make in
+                make.center.equalToSuperview()
+                make.width.equalTo(200)
+                make.height.equalTo(40)
+            }
+            
+            UIView.animate(withDuration: 0.3, delay: 2.0, options: .curveEaseOut, animations: {
+                toast.alpha = 0
+            }) { _ in
+                toast.removeFromSuperview()
+            }
         }
     }
     

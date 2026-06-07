@@ -4,6 +4,7 @@ import SnapKit
 class DeviceViewController: BaseViewController {
     
     private let scrollView = UIScrollView()
+    private let refreshControl = UIRefreshControl()
     private let contentView = UIView()
     private let listStack = UIStackView()
     private var emptyView: DeviceEmptyView?
@@ -37,6 +38,10 @@ class DeviceViewController: BaseViewController {
             make.height.greaterThanOrEqualTo(view.safeAreaLayoutGuide).priority(.low)
         }
         
+        refreshControl.tintColor = UIColor(hex: "#16E0BF")
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        scrollView.refreshControl = refreshControl
+        
         listStack.axis = .vertical
         listStack.spacing = 15
         contentView.addSubview(listStack)
@@ -48,6 +53,10 @@ class DeviceViewController: BaseViewController {
         }
     }
     
+    @objc private func handleRefresh() {
+        loadData()
+    }
+    
     private func loadData() {
         self.listStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         self.emptyView?.removeFromSuperview()
@@ -55,22 +64,26 @@ class DeviceViewController: BaseViewController {
         
         let devices = DeviceDataManager.shared.userDevices
         
-        if devices.isEmpty {
-            self.showEmptyState()
-        } else {
-            for device in devices {
-                let row = DeviceRowView()
-                row.configure(device: device)
-                
-                row.onDeleteTapped = { [weak self] in
-                    self?.handleDelete(device: device)
+        // 模拟刷新延迟
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self else { return }
+            self.refreshControl.endRefreshing()
+            
+            if devices.isEmpty {
+                self.showEmptyState()
+            } else {
+                for device in devices {
+                    let row = DeviceRowView()
+                    row.configure(device: device)
+                    
+                    row.onDeleteTapped = { [weak self] in
+                        self?.handleDelete(device: device)
+                    }
+                    
+                    self.listStack.addArrangedSubview(row)
+                    row.snp.makeConstraints { make in make.height.equalTo(60) }
                 }
                 
-                self.listStack.addArrangedSubview(row)
-                row.snp.makeConstraints { make in make.height.equalTo(60) }
-            }
-            
-            DispatchQueue.main.async {
                 self.view.layoutIfNeeded()
             }
         }

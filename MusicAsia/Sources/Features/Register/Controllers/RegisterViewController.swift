@@ -317,6 +317,79 @@ class RegisterViewController: BaseViewController {
         }
     }
     
+    private func uploadSelectedImages(_ images: [UIImage], to uploadView: FormImageUploadView?) {
+        guard let uploadView = uploadView, !images.isEmpty else { return }
+        
+        self.showLoading()
+        let group = DispatchGroup()
+        
+        // 使用一个结构体记录每张照片的上传结果（保证顺序）
+        struct UploadResult {
+            let image: UIImage
+            let url: String?
+            let errorMsg: String?
+        }
+        
+        // 初始化一个固定大小的数组，防止并发写入导致线程不安全或顺序错乱
+        var results: [UploadResult?] = Array(repeating: nil, count: images.count)
+        let queue = DispatchQueue(label: "com.musicasia.uploadQueue")
+        
+        for (index, image) in images.enumerated() {
+            group.enter()
+            CommonAPI.uploadImage(image: image) { apiResult in
+                let resultObj: UploadResult
+                switch apiResult {
+                case .success(let url):
+                    resultObj = UploadResult(image: image, url: url, errorMsg: nil)
+                case .failure(let error):
+                    resultObj = UploadResult(image: image, url: nil, errorMsg: error.localizedDescription)
+                }
+                
+                queue.async {
+                    results[index] = resultObj
+                    group.leave()
+                }
+            }
+        }
+        
+        group.notify(queue: .main) { [weak self] in
+            self?.hideLoading()
+            
+            var successImages: [UIImage] = []
+            var successUrls: [String] = []
+            var failureCount = 0
+            var lastErrorMsg: String? = nil
+            
+            for result in results {
+                guard let res = result else { continue }
+                if let url = res.url {
+                    successImages.append(res.image)
+                    successUrls.append(url)
+                } else {
+                    failureCount += 1
+                    lastErrorMsg = res.errorMsg
+                }
+            }
+            
+            // 将成功的照片添加到 UI 组件中
+            if !successImages.isEmpty {
+                uploadView.addImages(successImages)
+                for url in successUrls {
+                    uploadView.addUploadedUrl(url)
+                }
+            }
+            
+            // 提示上传结果
+            if failureCount > 0 {
+                if successImages.isEmpty {
+                    self?.showAlert(message: "照片上传失败: \(lastErrorMsg ?? "未知错误")")
+                } else {
+                    self?.showAlert(message: "已成功上传 \(successImages.count) 张，有 \(failureCount) 张上传失败，请重新选择并上传。")
+                }
+            }
+        }
+    }
+    
     @objc private func tabTapped(_ sender: UIButton) {
         let isPersonal = (sender == personalTabBtn)
         switchMode(isPersonal: isPersonal, animated: true)
@@ -407,6 +480,7 @@ class RegisterViewController: BaseViewController {
             // A2、生成个人用户信息
             print("生成个人用户信息")
             body.area = "默认地区"
+            self.submitRegister(body: body)
         } else {
             // B2、业务工号验证
             guard let bizId = businessIdField.textField.text, !bizId.isEmpty else {
@@ -416,8 +490,22 @@ class RegisterViewController: BaseViewController {
             // 真实的业务工号验证应在获取验证码或这里进行后端验证
             body.salesmanCode = bizId
             body.area = regionField.provinceButton.titleLabel?.text
+            body.companyName = shopNameField.textField.text
+            body.serviceCode = serviceIdField.textField.text
+            
+            // 直接从 UI 组件中获取已经上传成功的 URL
+            body.businessLicense = licenseUploadView.uploadedUrls.first
+            let shopUrls = shopPhotosUploadView.uploadedUrls
+            if shopUrls.count > 0 { body.companyPic1 = shopUrls[0] }
+            if shopUrls.count > 1 { body.companyPic2 = shopUrls[1] }
+            if shopUrls.count > 2 { body.companyPic3 = shopUrls[2] }
+            if shopUrls.count > 3 { body.companyPic4 = shopUrls[3] }
+            
+            self.submitRegister(body: body)
         }
-        
+    }
+    
+    private func submitRegister(body: PhoneRegisterBody) {
         AuthAPI.register(body: body) { [weak self] result in
             switch result {
             case .success(let token):
@@ -562,7 +650,7 @@ extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationC
         picker.dismiss(animated: true, completion: nil)
         
         if let image = info[.originalImage] as? UIImage {
-            currentUploadView?.addImage(image)
+            uploadSelectedImages([image], to: currentUploadView)
         }
     }
     
@@ -598,7 +686,7 @@ extension RegisterViewController: PHPickerViewControllerDelegate {
         group.notify(queue: .main) {
             let sortedKeys = imagesDict.keys.sorted()
             let sortedImages = sortedKeys.compactMap { imagesDict[$0] }
-            self.currentUploadView?.addImages(sortedImages)
+            self.uploadSelectedImages(sortedImages, to: self.currentUploadView)
         }
     }
 }

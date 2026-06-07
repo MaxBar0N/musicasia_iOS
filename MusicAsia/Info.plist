@@ -3,13 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<string>zh_CN</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>zh_CN</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
@@ -17,19 +21,17 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-        <string>1</string>
-        <key>LSApplicationQueriesSchemes</key>
-        <array>
-                <string>weixin</string>
-                <string>wechat</string>
-                <string>weixinULAPI</string>
-        </array>
-        <key>LSSupportsOpeningDocumentsInPlace</key>
+	<string>1</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>weixin</string>
+		<string>weixinULAPI</string>
+		<string>alipay</string>
+		<string>alipayshare</string>
+		<string>kuanshijie</string>
+	</array>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>我们需要使用蓝牙来连接您的外接播放设备，以保证歌曲的正常播放</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>我们需要使用蓝牙来连接您的外接播放设备，以保证歌曲的正常播放</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -41,6 +43,8 @@
 	<string>连接音乐外设需要使用您的蓝牙</string>
 	<key>NSCameraUsageDescription</key>
 	<string>扫描二维码需要使用您的相机</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>我们需要您的同意才能将二维码保存到相册</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -65,6 +69,11 @@
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>
-	<dict/>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackgroundColor</string>
+		<key>UIImageName</key>
+		<string>login_logo_icon</string>
+	</dict>
 </dict>
 </plist>

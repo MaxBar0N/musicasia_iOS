@@ -171,8 +171,16 @@ class RegionPickerView: UIView, UIPickerViewDelegate, UIPickerViewDataSource {
         pickerView.snp.makeConstraints { make in
             make.top.equalTo(toolbar.snp.bottom)
             make.left.right.equalToSuperview()
-            make.bottom.equalTo(containerView.safeAreaLayoutGuide.snp.bottom)
+            // 修复约束冲突：移除了强制设定为 safeAreaLayoutGuide.snp.bottom 的约束，改为根据 picker 本身高度决定 container 底部
             make.height.equalTo(200)
+            make.bottom.equalToSuperview().offset(-SafeAreaInsets.bottom)
+        }
+    }
+    
+    // 辅助获取底部安全区
+    private struct SafeAreaInsets {
+        static var bottom: CGFloat {
+            return UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
         }
     }
     
@@ -183,7 +191,7 @@ class RegionPickerView: UIView, UIPickerViewDelegate, UIPickerViewDataSource {
         }
         
         // 初始状态放在屏幕底部之外
-        containerView.snp.makeConstraints { make in
+        containerView.snp.remakeConstraints { make in
             make.left.right.equalToSuperview()
             make.top.equalTo(self.snp.bottom)
         }
@@ -409,6 +417,9 @@ class FormImageUploadView: UIView {
     var maxCount: Int
     private let uploadBtn = UIButton(type: .system)
     
+    // 用于存储已经上传成功的图片 URL 数组
+    private(set) var uploadedUrls: [String] = []
+    
     private(set) var images: [UIImage] = [] {
         didSet {
             reloadImages()
@@ -416,6 +427,7 @@ class FormImageUploadView: UIView {
     }
     
     var onUploadTapped: (() -> Void)?
+    var onImageRemoved: ((Int) -> Void)?
     
     init(title: String, subtitle: String? = nil, maxCount: Int = 1) {
         titleLabel = FormTitleLabel(title: title)
@@ -471,6 +483,10 @@ class FormImageUploadView: UIView {
     
     func addImage(_ image: UIImage) {
         addImages([image])
+    }
+    
+    func addUploadedUrl(_ url: String) {
+        uploadedUrls.append(url)
     }
     
     private func reloadImages() {
@@ -565,6 +581,10 @@ class FormImageUploadView: UIView {
             guard let self = self else { return }
             if index >= 0 && index < self.images.count {
                 self.images.remove(at: index)
+                if index < self.uploadedUrls.count {
+                    self.uploadedUrls.remove(at: index)
+                }
+                self.onImageRemoved?(index)
             }
         }))
         vc.present(alert, animated: true, completion: nil)
