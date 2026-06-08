@@ -33,6 +33,8 @@ targets:
     info:
       path: MusicAsia/Info.plist
       properties:
+        CFBundleDisplayName: "唱享视界"
+        CFBundleName: "唱享视界"
         CFBundleDevelopmentRegion: "zh_CN"
         CFBundleLocalizations:
           - "zh_CN"

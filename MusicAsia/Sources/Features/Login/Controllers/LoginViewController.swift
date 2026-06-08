@@ -63,7 +63,8 @@ class LoginViewController: BaseViewController {
         
         view.addSubview(logoImageView)
         logoImageView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(60)
+            let topOffset = UIScreen.main.bounds.height * 0.12
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(topOffset)
             make.centerX.equalToSuperview()
             make.width.equalTo(178)
             make.height.equalTo(133)
@@ -81,15 +82,16 @@ class LoginViewController: BaseViewController {
         view.addSubview(phoneTextField)
         
         phoneTitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(logoImageView.snp.bottom).offset(120)
+            let offset = UIScreen.main.bounds.height * 0.15
+            make.top.equalTo(logoImageView.snp.bottom).offset(offset)
             make.left.equalToSuperview().offset(30)
         }
         
         phoneTextField.snp.makeConstraints { make in
-            make.top.equalTo(phoneTitleLabel.snp.bottom).offset(10)
+            make.top.equalTo(phoneTitleLabel.snp.bottom).offset(15)
             make.left.equalToSuperview().offset(30)
             make.right.equalToSuperview().offset(-30)
-            make.height.equalTo(40)
+            make.height.equalTo(48) // 稍微加高输入框
         }
     }
     
@@ -107,22 +109,24 @@ class LoginViewController: BaseViewController {
         view.addSubview(sendCodeButton)
         
         codeTitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(phoneTextField.snp.bottom).offset(20)
+            // 增加两个输入框之间的间距
+            let offset = UIScreen.main.bounds.height * 0.04
+            make.top.equalTo(phoneTextField.snp.bottom).offset(max(offset, 25))
             make.left.equalToSuperview().offset(30)
         }
         
         sendCodeButton.snp.makeConstraints { make in
-            make.top.equalTo(codeTitleLabel.snp.bottom).offset(10)
+            make.top.equalTo(codeTitleLabel.snp.bottom).offset(15)
             make.right.equalToSuperview().offset(-30)
-            make.width.equalTo(80)
-            make.height.equalTo(40)
+            make.width.equalTo(90)
+            make.height.equalTo(48)
         }
         
         codeTextField.snp.makeConstraints { make in
             make.centerY.equalTo(sendCodeButton)
             make.left.equalToSuperview().offset(30)
             make.right.equalTo(sendCodeButton.snp.left).offset(-15)
-            make.height.equalTo(40)
+            make.height.equalTo(48)
         }
     }
     
@@ -130,7 +134,7 @@ class LoginViewController: BaseViewController {
         loginButton.setTitle("登录", for: .normal)
         registerButton.setTitle("注册", for: .normal)
         
-        registerButton.customCornerRadius = 24
+        registerButton.customCornerRadius = 25
         
         let stackView = UIStackView(arrangedSubviews: [loginButton, registerButton])
         stackView.axis = .horizontal
@@ -139,10 +143,11 @@ class LoginViewController: BaseViewController {
         
         view.addSubview(stackView)
         stackView.snp.makeConstraints { make in
-            make.top.equalTo(codeTextField.snp.bottom).offset(60)
+            let offset = UIScreen.main.bounds.height * 0.08
+            make.top.equalTo(codeTextField.snp.bottom).offset(max(offset, 60))
             make.left.equalToSuperview().offset(30)
             make.right.equalToSuperview().offset(-30)
-            make.height.equalTo(48)
+            make.height.equalTo(50) // 稍微加高按钮
         }
     }
     
