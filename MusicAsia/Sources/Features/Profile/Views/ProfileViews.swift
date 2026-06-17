@@ -216,7 +216,7 @@ class ProfileSongRowView: UIView {
         favButton.addTarget(self, action: #selector(favAction), for: .touchUpInside)
         addSubview(favButton)
         
-        singButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+        singButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
         singButton.tintColor = .white
         singButton.addTarget(self, action: #selector(singAction), for: .touchUpInside)
         addSubview(singButton)
@@ -249,7 +249,7 @@ class ProfileSongRowView: UIView {
             singButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
             singButton.tintColor = UIColor(hex: "#16E0BF")
         } else {
-            singButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+            singButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
             singButton.tintColor = .white
         }
     }

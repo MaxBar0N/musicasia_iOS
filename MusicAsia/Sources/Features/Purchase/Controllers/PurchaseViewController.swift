@@ -17,7 +17,7 @@ class PurchaseViewController: BaseViewController {
     private var collectionView: UICollectionView!
     
     private let wechatPayView = UIView()
-    private let agreementView = AgreementCheckboxView(text: "购买代表同意并接受 ", linkText: "《平台交易规则》")
+    private let agreementView = AgreementCheckboxView()
     private let payButton = GradientButton()
     
     private let bottomCardView = UIView()
@@ -467,7 +467,7 @@ class PurchaseViewController: BaseViewController {
                         webVC.orderId = orderInfo.orderId ?? 0
                         webVC.orderNo = orderInfo.orderCode ?? ""
                         webVC.onComplete = { [weak self] oId, oNo in
-                            self?.showPaymentConfirmPopup(orderId: oId, orderNo: oNo)
+                            self?.checkPaymentStatus(orderId: oId, orderNo: oNo)
                         }
                         
                         let nav = UINavigationController(rootViewController: webVC)
@@ -487,15 +487,6 @@ class PurchaseViewController: BaseViewController {
                 }
             }
         }
-    }
-    
-    private func showPaymentConfirmPopup(orderId: Int, orderNo: String) {
-        let alert = UIAlertController(title: "支付确认", message: "请确认您是否已在微信内完成支付？", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "已完成支付", style: .default, handler: { [weak self] _ in
-            self?.checkPaymentStatus(orderId: orderId, orderNo: orderNo)
-        }))
-        alert.addAction(UIAlertAction(title: "重新支付", style: .cancel, handler: nil))
-        self.present(alert, animated: true)
     }
     
     private func checkPaymentStatus(orderId: Int, orderNo: String) {
@@ -604,9 +595,18 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
     }
 
     @objc private func closeTapped() {
-        self.presentingViewController?.presentingViewController?.dismiss(animated: true) {
-            self.onComplete?(self.orderId, self.orderNo)
-        }
+        let alert = UIAlertController(title: "支付确认", message: "请确认您是否已在微信内完成支付？", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "已完成支付", style: .default, handler: { [weak self] _ in
+            self?.presentingViewController?.presentingViewController?.dismiss(animated: true) {
+                if let self = self {
+                    self.onComplete?(self.orderId, self.orderNo)
+                }
+            }
+        }))
+        alert.addAction(UIAlertAction(title: "关闭", style: .cancel, handler: { [weak self] _ in
+            self?.presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
+        }))
+        self.present(alert, animated: true)
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {

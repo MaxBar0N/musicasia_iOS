@@ -171,11 +171,13 @@ class AlbumViewController: BaseViewController {
                     }
                     
                     if !imageUrl.isEmpty && !imageUrl.hasPrefix("http") {
-                        imageUrl = "http://47.243.180.202:48080" + (imageUrl.hasPrefix("/") ? "" : "/") + imageUrl
+                        imageUrl = "https://iosapi.musicasia.cn" + (imageUrl.hasPrefix("/") ? "" : "/") + imageUrl
                     }
                     
-                    // 对 URL 中的特殊字符（如中文或空格）进行编码
-                    imageUrl = imageUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? imageUrl
+                    // 避免重复编码
+                    if URL(string: imageUrl) == nil {
+                        imageUrl = imageUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? imageUrl
+                    }
                     
                     return Album(id: "\(album.musicCollectionId ?? 0)",
                           name: album.collectionName ?? "未知专辑",
@@ -243,7 +245,7 @@ class AlbumViewController: BaseViewController {
                 let group = DispatchGroup()
                 for song in songs {
                     // 如果还没有收藏，则调用收藏接口 (type: "1" 表示单曲)
-                    if song.userIsCollect == false {
+                    if song.userIsCollect != true {
                         group.enter()
                         SongAPI.collectSong(collectionSongsId: song.collectionSongsId ?? 0, type: "1", collectionName: nil) { _ in
                             group.leave()
@@ -414,8 +416,8 @@ extension AlbumViewController: UICollectionViewDelegate, UICollectionViewDataSou
         let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height
         
-        // 滑动到底部触发加载更多
-        if offsetY > contentHeight - height + 20 {
+        // 滑动到底部触发加载更多，防御下拉刷新导致的错误触发
+        if offsetY > 0 && offsetY > contentHeight - height + 20 {
             if hasMoreData && !isLoading {
                 isLoading = true
                 currentPage += 1

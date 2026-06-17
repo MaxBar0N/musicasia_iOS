@@ -23,10 +23,6 @@ class DeviceViewController: BaseViewController {
     }
     
     private func setupUI() {
-        let addBtn = UIBarButtonItem(image: UIImage(systemName: "plus.square"), style: .plain, target: self, action: #selector(showAddPopup))
-        addBtn.tintColor = .white
-        navigationItem.rightBarButtonItem = addBtn
-        
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
@@ -92,10 +88,6 @@ class DeviceViewController: BaseViewController {
     private func showEmptyState() {
         if emptyView == nil {
             emptyView = DeviceEmptyView()
-            emptyView?.onAddTapped = { [weak self] in
-                print("触发 onAddTapped 回调")
-                self?.showAddPopup()
-            }
         }
         
         view.addSubview(emptyView!)

@@ -174,9 +174,14 @@ class LoginViewController: BaseViewController {
                     print("验证码发送成功")
                     self?.showAlert(message: "验证码已发送，请注意查收")
                 case .failure(let error):
-                    // 如果提示后端异常或类似错误，有可能是验证码发送成功但是返回的类型不匹配或者第一次缓存问题
-                    // 这里我们为了用户体验，遇到非严重的报错时仅弹窗提示但不直接停止倒计时，让用户可以尝试重试
-                    self?.showAlert(message: "验证码发送异常: \(error.localizedDescription)")
+                    if case .serverError(let code, let msg) = error, code == 401 {
+                        // 提示用户账号不存在，请先注册
+                        self?.showAlert(message: "账号未注册，请先点击注册") {
+                            self?.handleRegister()
+                        }
+                    } else {
+                        self?.showAlert(message: "验证码发送异常: \(error.localizedDescription)")
+                    }
                     self?.stopTimer()
                 }
             }

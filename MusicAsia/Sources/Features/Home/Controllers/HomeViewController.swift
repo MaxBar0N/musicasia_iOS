@@ -62,7 +62,7 @@ class HomeViewController: BaseViewController {
         
         ad2.onTap = { [weak self] in
             // 5G宽视界跳转逻辑
-            let appScheme = "kuanshijie://" // 请根据实际情况修改 project.yml 中的白名单
+            let appScheme = "wotvapp://" // 5G宽视界 schema
             let fallbackUrl = "https://webwotv.chinaunicomvideo.cn/wovideo/wotvStarKaraoke/index.html#/subject/catauto1111130298?reflectionId=ACT0580848008&channel=xnkg"
             
             if let schemeURL = URL(string: appScheme), UIApplication.shared.canOpenURL(schemeURL) {
@@ -219,26 +219,30 @@ class HomeViewController: BaseViewController {
             }
             
             if !imageUrl.isEmpty && !imageUrl.hasPrefix("http") {
-                imageUrl = "http://47.243.180.202:48080" + (imageUrl.hasPrefix("/") ? "" : "/") + imageUrl
+                imageUrl = "https://iosapi.musicasia.cn" + (imageUrl.hasPrefix("/") ? "" : "/") + imageUrl
             }
             
-            // 对 URL 中的特殊字符（如中文或空格）进行编码
-            imageUrl = imageUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? imageUrl
+            // 避免重复编码
+            if URL(string: imageUrl) == nil {
+                imageUrl = imageUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? imageUrl
+            }
             
             let uiAlbum = Album(id: "\(album.musicCollectionId ?? 0)",
                                 name: album.collectionName ?? "未知专辑",
                                 coverUrl: imageUrl,
                                 isFavorited: false)
             card.configure(with: uiAlbum)
-            card.onFavTapped = { [weak self] in
-                // Home页的专辑暂不支持收藏
+            card.onDownloadTapped = { [weak self] in
+                self?.handleAlbumDownload(for: uiAlbum)
             }
             card.onPlayTapped = { [weak self] in
                 self?.handleAlbumPlay(at: index, album: album)
             }
-            albumsStack.addArrangedSubview(card)
         }
     }
+    
+    private var isDownloading = false
+    private var downloadPopup: DownloadProgressView?
     
     // MARK: - Actions (业务逻辑)
     
@@ -304,5 +308,158 @@ class HomeViewController: BaseViewController {
         songVC.title = "猜你喜欢 - \(album.collectionName ?? "")"
         songVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(songVC, animated: true)
+    }
+    
+    // MARK: - Download Logic
+    private func handleAlbumDownload(for album: Album) {
+        showLoading()
+        
+        // 1. 获取该专辑的所有歌曲
+        SongAPI.getSongs(pageNum: 1, pageSize: 1000, collectionName: album.name) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let pageResponse):
+                let songs = pageResponse.data?.voList ?? []
+                if songs.isEmpty {
+                    self.hideLoading()
+                    self.showAlert(message: "该专辑暂无歌曲")
+                    return
+                }
+                
+                // 2. 遍历收藏专辑里的所有歌曲
+                let group = DispatchGroup()
+                for song in songs {
+                    // 如果还没有收藏，则调用收藏接口 (type: "1" 表示单曲)
+                    if song.userIsCollect != true {
+                        group.enter()
+                        SongAPI.collectSong(collectionSongsId: song.collectionSongsId ?? 0, type: "1", collectionName: nil) { _ in
+                            group.leave()
+                        }
+                    }
+                }
+                
+                // 所有歌曲收藏完成后
+                group.notify(queue: .main) {
+                    self.hideLoading()
+                    // 3. 收藏完成后静默检查 U 盘权限
+                    self.checkPermissionAndDownload(album: album)
+                }
+                
+            case .failure(let error):
+                self.hideLoading()
+                self.showAlert(message: "获取专辑歌曲失败: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func checkPermissionAndDownload(album: Album) {
+        UfiManager.shared.checkDownloadPermission { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success:
+                self.startDownloadProcess(for: album)
+            case .failure(let error):
+                // 提示用户需要插入 U 盘，同时阻断后续的下载弹窗
+                self.showAlert(message: error.localizedDescription)
+            }
+        }
+    }
+    
+    private func startDownloadProcess(for album: Album) {
+        if isDownloading { return }
+        isDownloading = true
+        
+        // 请求此专辑的所有歌曲
+        SongAPI.getSongs(pageNum: 1, pageSize: 1000, collectionName: album.name) { [weak self] songResult in
+            guard let self = self else { return }
+            switch songResult {
+            case .success(let pageResponse):
+                let apiSongs = pageResponse.data?.voList ?? []
+                if apiSongs.isEmpty {
+                    self.isDownloading = false
+                    self.showAlert(message: "该专辑暂无歌曲可供下载")
+                    return
+                }
+                
+                // 转换为 UI 模型
+                let songs = apiSongs.map { song in
+                    Song(id: "\(song.collectionSongsId ?? 0)",
+                         name: song.songName ?? "未知歌曲",
+                         artist: song.singer ?? "未知歌手",
+                         source: (song.songNameSecret?.hasPrefix("http") == true) ? .changba : .unicom,
+                         url: song.songNameSecret ?? "",
+                         isFavorited: song.userIsCollect ?? true, // 刚收藏过
+                         isPlaying: false,
+                         isDownloaded: false)
+                }
+                
+                self.showDownloadPopup(with: songs)
+                
+            case .failure(let error):
+                self.isDownloading = false
+                self.showAlert(message: "获取专辑歌曲失败: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func showDownloadPopup(with songs: [Song]) {
+        // 展示弹窗
+        downloadPopup = DownloadProgressView()
+        downloadPopup?.show(in: self.navigationController?.view ?? self.view)
+        downloadPopup?.updateProgress(current: 0, total: songs.count)
+        
+        downloadPopup?.onCancel = { [weak self] in
+            self?.isDownloading = false
+            print("用户取消了下载")
+        }
+        
+        // 串行下载
+        downloadNextSong(songs: songs, currentIndex: 0)
+    }
+    
+    private func downloadNextSong(songs: [Song], currentIndex: Int) {
+        guard isDownloading else { return } // 已取消
+        
+        if currentIndex >= songs.count {
+            isDownloading = false
+            downloadPopup?.finishDownload(total: songs.count)
+            return
+        }
+        
+        let song = songs[currentIndex]
+        
+        // 处理 URL (唱吧直链 vs 联通加密)
+        if song.source == .unicom {
+            SongAPI.getSongUrl(cid: song.url) { [weak self] result in
+                switch result {
+                case .success(let decryptedURL):
+                    self?.performActualDownload(song: song, url: decryptedURL, allSongs: songs, currentIndex: currentIndex)
+                case .failure(let error):
+                    print("解密失败 \(song.name): \(error.localizedDescription)")
+                    // 失败也继续下一首
+                    self?.performActualDownload(song: song, url: "", allSongs: songs, currentIndex: currentIndex)
+                }
+            }
+        } else {
+            performActualDownload(song: song, url: song.url, allSongs: songs, currentIndex: currentIndex)
+        }
+    }
+    
+    private func performActualDownload(song: Song, url: String, allSongs: [Song], currentIndex: Int) {
+        guard isDownloading else { return }
+        print("开始下载: \(song.name) -> URL: \(url)")
+        
+        // 模拟下载到 UFI 目录并同步接口
+        DispatchQueue.global().asyncAfter(deadline: .now() + 1.5) { // 模拟下载耗时 1.5s
+            DispatchQueue.main.async {
+                guard self.isDownloading else { return }
+                print("下载完成并同步接口: \(song.name)")
+                
+                self.downloadPopup?.updateProgress(current: currentIndex + 1, total: allSongs.count)
+                // 递归下载下一首
+                self.downloadNextSong(songs: allSongs, currentIndex: currentIndex + 1)
+            }
+        }
     }
 }

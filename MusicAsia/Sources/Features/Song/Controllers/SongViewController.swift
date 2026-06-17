@@ -437,7 +437,7 @@ extension SongViewController: UITextFieldDelegate, UIScrollViewDelegate {
         let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height
         
-        if offsetY > contentHeight - height + 20 {
+        if offsetY > 0 && offsetY > contentHeight - height + 20 {
             if hasMoreData && !isLoading {
                 currentPage += 1
                 loadPageData()

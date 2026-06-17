@@ -158,10 +158,9 @@ class SongRowView: UIView {
 class AlbumCardView: UIView {
     private let imageView = UIImageView()
     private let titleLabel = UILabel()
-    let favButton = UIButton(type: .system)
-    let playButton = UIButton(type: .system)
+    let downloadButton = UIButton(type: .system)
     
-    var onFavTapped: (() -> Void)?
+    var onDownloadTapped: (() -> Void)?
     var onPlayTapped: (() -> Void)?
     
     init() {
@@ -187,13 +186,13 @@ class AlbumCardView: UIView {
         titleLabel.font = .systemFont(ofSize: 14, weight: .medium)
         addSubview(titleLabel)
         
-        favButton.addTarget(self, action: #selector(favAction), for: .touchUpInside)
-        addSubview(favButton)
-        
-        playButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        playButton.tintColor = .white
-        playButton.addTarget(self, action: #selector(playAction), for: .touchUpInside)
-        addSubview(playButton)
+        // 下载按钮使用本地资源
+        downloadButton.setImage(UIImage(named: "download_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
+        downloadButton.contentHorizontalAlignment = .fill
+        downloadButton.contentVerticalAlignment = .fill
+        downloadButton.imageView?.contentMode = .scaleAspectFit
+        downloadButton.addTarget(self, action: #selector(downloadAction), for: .touchUpInside)
+        addSubview(downloadButton)
         
         imageView.snp.makeConstraints { make in make.edges.equalToSuperview() }
         
@@ -202,22 +201,16 @@ class AlbumCardView: UIView {
             make.height.equalTo(40)
         }
         
+        downloadButton.snp.makeConstraints { make in
+            make.right.equalToSuperview().offset(-8)
+            make.bottom.equalToSuperview().offset(-8)
+            make.width.height.equalTo(20)
+        }
+        
         titleLabel.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(10)
-            make.bottom.equalToSuperview().offset(-10)
-            make.right.equalTo(favButton.snp.left).offset(-5)
-        }
-        
-        playButton.snp.makeConstraints { make in
-            make.right.equalToSuperview().offset(-10)
-            make.centerY.equalTo(titleLabel)
-            make.width.height.equalTo(24)
-        }
-        
-        favButton.snp.makeConstraints { make in
-            make.right.equalTo(playButton.snp.left).offset(-10)
-            make.centerY.equalTo(titleLabel)
-            make.width.height.equalTo(24)
+            make.left.equalToSuperview().offset(8)
+            make.centerY.equalTo(downloadButton)
+            make.right.equalTo(downloadButton.snp.left).offset(-8)
         }
         
         DispatchQueue.main.async {
@@ -246,16 +239,9 @@ class AlbumCardView: UIView {
             print("AlbumCardView Invalid URL string: \(album.coverUrl)")
             imageView.image = UIImage(systemName: "music.note.list")
         }
-        updateFavState(isFav: album.isFavorited)
     }
     
-    func updateFavState(isFav: Bool) {
-        let iconName = isFav ? "heart.fill" : "heart"
-        favButton.setImage(UIImage(systemName: iconName), for: .normal)
-        favButton.tintColor = isFav ? UIColor(hex: "#E53E3E") : .white
-    }
-    
-    @objc private func favAction() { onFavTapped?() }
+    @objc private func downloadAction() { onDownloadTapped?() }
     @objc private func playAction() { onPlayTapped?() }
     
     required init?(coder: NSCoder) { fatalError() }

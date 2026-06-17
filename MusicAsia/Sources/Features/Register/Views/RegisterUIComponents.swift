@@ -638,7 +638,7 @@ class FormImageUploadView: UIView {
 /// 协议复选框
 class AgreementCheckboxView: UIView {
     let checkboxButton = UIButton(type: .custom)
-    let agreementLabel = UILabel()
+    let agreementTextView = UITextView()
     
     var isChecked: Bool = false {
         didSet {
@@ -646,39 +646,49 @@ class AgreementCheckboxView: UIView {
         }
     }
     
-    // 添加初始化方法以支持自定义文本
-    init(text: String = "注册代表同意并接受 ", linkText: String = "《平台注册规则》") {
-        super.init(frame: .zero)
-        setupUI(text: text, linkText: linkText)
-    }
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupUI(text: "注册代表同意并接受 ", linkText: "《平台注册规则》")
+        setupUI()
     }
     
-    private func setupUI(text: String, linkText: String) {
+    private func setupUI() {
         checkboxButton.addTarget(self, action: #selector(toggleCheck), for: .touchUpInside)
         
+        agreementTextView.backgroundColor = .clear
+        agreementTextView.isEditable = false
+        agreementTextView.isScrollEnabled = false
+        agreementTextView.textContainerInset = .zero
+        agreementTextView.textContainer.lineFragmentPadding = 0
+        agreementTextView.linkTextAttributes = [
+            .foregroundColor: UIColor.white
+        ]
+        
+        let text = "注册/购买代表同意并接受 《使用协议》 和 《隐私协议》"
         let attrStr = NSMutableAttributedString(string: text, attributes: [
             .foregroundColor: UIColor.white.withAlphaComponent(0.7),
             .font: UIFont.systemFont(ofSize: 12)
         ])
-        attrStr.append(NSAttributedString(string: linkText, attributes: [
-            .foregroundColor: UIColor.white,
-            .font: UIFont.systemFont(ofSize: 12, weight: .medium)
-        ]))
-        agreementLabel.attributedText = attrStr
+        
+        let range1 = (text as NSString).range(of: "《使用协议》")
+        attrStr.addAttribute(.link, value: "musicasia://agreement", range: range1)
+        attrStr.addAttribute(.font, value: UIFont.systemFont(ofSize: 12, weight: .medium), range: range1)
+        
+        let range2 = (text as NSString).range(of: "《隐私协议》")
+        attrStr.addAttribute(.link, value: "musicasia://privacy", range: range2)
+        attrStr.addAttribute(.font, value: UIFont.systemFont(ofSize: 12, weight: .medium), range: range2)
+        
+        agreementTextView.attributedText = attrStr
+        agreementTextView.delegate = self
         
         addSubview(checkboxButton)
-        addSubview(agreementLabel)
+        addSubview(agreementTextView)
         
         checkboxButton.snp.makeConstraints { make in
             make.left.centerY.equalToSuperview()
             make.width.height.equalTo(20)
         }
         
-        agreementLabel.snp.makeConstraints { make in
+        agreementTextView.snp.makeConstraints { make in
             make.left.equalTo(checkboxButton.snp.right).offset(8)
             make.centerY.right.equalToSuperview()
             make.top.bottom.equalToSuperview()
@@ -688,10 +698,8 @@ class AgreementCheckboxView: UIView {
     }
     
     private func updateState() {
-        // "circle" 为空心圆圈, "circle.inset.filled" 为内部带圆点的圆圈
         let imageName = isChecked ? "circle.inset.filled" : "circle"
         checkboxButton.setImage(UIImage(systemName: imageName), for: .normal)
-        // 无论选中与否都保持白色
         checkboxButton.tintColor = .white
     }
     
@@ -704,6 +712,28 @@ class AgreementCheckboxView: UIView {
     }
 }
 
+extension AgreementCheckboxView: UITextViewDelegate {
+    func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        if URL.absoluteString == "musicasia://agreement" {
+            let vc = AgreementViewController()
+            vc.agreementTitle = "使用协议"
+            vc.urlString = "https://www.musicasia.cn/agreement"
+            vc.hidesBottomBarWhenPushed = true
+            parentViewController?.navigationController?.pushViewController(vc, animated: true)
+            return false
+        } else if URL.absoluteString == "musicasia://privacy" {
+            let vc = AgreementViewController()
+            vc.agreementTitle = "隐私协议"
+            vc.urlString = "https://www.musicasia.cn/privacy"
+            vc.hidesBottomBarWhenPushed = true
+            parentViewController?.navigationController?.pushViewController(vc, animated: true)
+            return false
+        }
+        return true
+    }
+}
+
+// 扩展 UIView 以获取其所在的 UIViewController
 extension UIView {
     var parentViewController: UIViewController? {
         var parentResponder: UIResponder? = self

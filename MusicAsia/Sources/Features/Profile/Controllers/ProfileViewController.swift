@@ -218,7 +218,7 @@ class ProfileViewController: BaseViewController {
         }
         
         let downloadLabel = UILabel()
-        downloadLabel.text = "下载歌曲"
+        downloadLabel.text = "一键下载缓存"
         downloadLabel.textColor = .white
         downloadLabel.font = .systemFont(ofSize: 12)
         downloadStack.addArrangedSubview(downloadLabel)
@@ -233,7 +233,7 @@ class ProfileViewController: BaseViewController {
         downloadContainer.snp.makeConstraints { make in
             make.right.centerY.equalToSuperview()
             make.height.equalTo(16)
-            make.width.equalTo(72)
+            make.width.equalTo(100)
         }
         
         downloadBtn.snp.makeConstraints { make in
@@ -241,7 +241,7 @@ class ProfileViewController: BaseViewController {
         }
         
         // 由于约束固定，直接赋值 frame 避免主线程异步带来的布局闪烁或卡顿
-        downloadGradient.frame = CGRect(x: 0, y: 0, width: 72, height: 16)
+        downloadGradient.frame = CGRect(x: 0, y: 0, width: 100, height: 16)
         
         // 3. Songs List
         songsStack.axis = .vertical
@@ -352,7 +352,7 @@ class ProfileViewController: BaseViewController {
                       }
                   }
                   if !logoUrl.isEmpty && !logoUrl.hasPrefix("http") {
-                      logoUrl = "http://47.243.180.202:48080" + (logoUrl.hasPrefix("/") ? "" : "/") + logoUrl
+                      logoUrl = "https://iosapi.musicasia.cn" + (logoUrl.hasPrefix("/") ? "" : "/") + logoUrl
                   }
                   logoUrl = logoUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? logoUrl
                   
@@ -648,7 +648,7 @@ extension ProfileViewController: UIScrollViewDelegate {
         let height = scrollView.frame.size.height
         
         // 防御：只有在内容高度大于视图高度，并且滚动到了底部时才触发
-        if contentHeight > 0 && offsetY > contentHeight - height + 20 {
+        if offsetY > 0 && contentHeight > 0 && offsetY > contentHeight - height + 20 {
             if hasMoreData && !isLoading {
                 currentPage += 1
                 loadPageData()

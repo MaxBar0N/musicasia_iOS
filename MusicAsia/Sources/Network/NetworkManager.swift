@@ -119,13 +119,19 @@ class NetworkManager {
     private let session: Session
     
     // 全局基础 URL
-    private let baseURL = "http://47.243.180.202:48080"
+    private let baseURL = "https://iosapi.musicasia.cn/prod-api"
     
     private init() {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 60 // 请求超时改为 60s
         configuration.timeoutIntervalForResource = 120 // 资源超时改为 120s
-        self.session = Session(configuration: configuration)
+        
+        // 忽略 SSL 证书校验（针对测试环境或证书不匹配的情况）
+        let serverTrustManager = ServerTrustManager(evaluators: [
+            "iosapi.musicasia.cn": DisabledTrustEvaluator()
+        ])
+        
+        self.session = Session(configuration: configuration, serverTrustManager: serverTrustManager)
     }
     
     /// 获取通用的 HTTP Headers (例如 Token, User-Agent 等)

@@ -642,6 +642,22 @@ class RegisterViewController: BaseViewController {
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
+    
+    @objc private func handleUserAgreement() {
+        let vc = AgreementViewController()
+        vc.agreementTitle = "使用协议"
+        vc.urlString = "https://musicasia.cn/agreement"
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc private func handlePrivacyPolicy() {
+        let vc = AgreementViewController()
+        vc.agreementTitle = "隐私协议"
+        vc.urlString = "https://musicasia.cn/privacy"
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
 
 // MARK: - UIImagePickerControllerDelegate & UINavigationControllerDelegate

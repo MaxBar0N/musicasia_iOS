@@ -3,10 +3,6 @@ import SnapKit
 
 // MARK: - Empty State View
 class DeviceEmptyView: UIView {
-    let addLabel = UILabel()
-    let actionButton = UIButton(type: .custom)
-    
-    var onAddTapped: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -30,43 +26,15 @@ class DeviceEmptyView: UIView {
         addSubview(stack)
         
         let text1 = UILabel()
-        text1.text = "暂未添加任何设备，请点击"
+        text1.text = "暂无设备"
         text1.textColor = UIColor.white.withAlphaComponent(0.8)
         text1.font = .systemFont(ofSize: 14)
         stack.addArrangedSubview(text1)
-        
-        addLabel.text = "此处"
-        addLabel.textColor = UIColor(hex: "#16E0BF")
-        addLabel.font = .systemFont(ofSize: 14, weight: .bold)
-        let underline = UIView()
-        underline.backgroundColor = UIColor(hex: "#16E0BF")
-        addLabel.addSubview(underline)
-        underline.snp.makeConstraints { make in
-            make.left.right.bottom.equalToSuperview()
-            make.height.equalTo(1)
-        }
-        stack.addArrangedSubview(addLabel)
-        
-        let text2 = UILabel()
-        text2.text = "添加设备"
-        text2.textColor = UIColor.white.withAlphaComponent(0.8)
-        text2.font = .systemFont(ofSize: 14)
-        stack.addArrangedSubview(text2)
         
         stack.snp.makeConstraints { make in
             make.top.equalTo(imageView.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
-        
-        actionButton.addTarget(self, action: #selector(handleTap), for: .touchUpInside)
-        addSubview(actionButton)
-        actionButton.snp.makeConstraints { make in
-            make.edges.equalTo(stack)
-        }
-    }
-    
-    @objc private func handleTap() {
-        onAddTapped?()
     }
     
     required init?(coder: NSCoder) { fatalError() }
