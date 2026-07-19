@@ -646,7 +646,7 @@ class RegisterViewController: BaseViewController {
     @objc private func handleUserAgreement() {
         let vc = AgreementViewController()
         vc.agreementTitle = "使用协议"
-        vc.urlString = "https://musicasia.cn/agreement"
+        vc.urlString = "https://www.musicasia.cn/agreement"
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -654,7 +654,7 @@ class RegisterViewController: BaseViewController {
     @objc private func handlePrivacyPolicy() {
         let vc = AgreementViewController()
         vc.agreementTitle = "隐私协议"
-        vc.urlString = "https://musicasia.cn/privacy"
+        vc.urlString = "https://www.musicasia.cn/privacy"
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }

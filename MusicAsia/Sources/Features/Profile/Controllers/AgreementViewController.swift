@@ -13,7 +13,6 @@ class AgreementViewController: BaseViewController {
         super.viewDidLoad()
         title = agreementTitle
         setupUI()
-        loadURL()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -22,14 +21,31 @@ class AgreementViewController: BaseViewController {
     }
     
     private func setupUI() {
-        let config = WKWebViewConfiguration()
-        webView = WKWebView(frame: .zero, configuration: config)
-        webView.backgroundColor = .clear
-        webView.isOpaque = false // 适配可能存在的深色背景
+        // 显示加载指示器，避免 WebView 初始化阻塞页面跳转动画
+        let activityIndicator = UIActivityIndicatorView(style: .medium)
+        activityIndicator.color = .white
+        activityIndicator.startAnimating()
+        view.addSubview(activityIndicator)
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
         
-        view.addSubview(webView)
-        webView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let config = WKWebViewConfiguration()
+            self.webView = WKWebView(frame: .zero, configuration: config)
+            self.webView.backgroundColor = .clear
+            self.webView.isOpaque = false // 适配可能存在的深色背景
+            
+            self.view.addSubview(self.webView)
+            self.webView.snp.makeConstraints { make in
+                make.edges.equalTo(self.view.safeAreaLayoutGuide)
+            }
+            
+            activityIndicator.stopAnimating()
+            activityIndicator.removeFromSuperview()
+            
+            self.loadURL()
         }
     }
     

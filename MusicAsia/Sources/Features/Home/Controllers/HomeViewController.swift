@@ -10,6 +10,7 @@ class HomeViewController: BaseViewController {
     private let adsStack = UIStackView()
     private let songsContainer = UIView()
     private let songsStack = UIStackView()
+    private let albumsScrollView = UIScrollView()
     private let albumsStack = UIStackView()
     
     override func viewDidLoad() {
@@ -116,15 +117,23 @@ class HomeViewController: BaseViewController {
             make.left.equalToSuperview().offset(20)
         }
         
-        albumsStack.axis = .horizontal
-        albumsStack.spacing = 15
-        albumsStack.distribution = .fillEqually
-        contentView.addSubview(albumsStack)
-        albumsStack.snp.makeConstraints { make in
+        albumsScrollView.showsHorizontalScrollIndicator = false
+        albumsScrollView.contentInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+        contentView.addSubview(albumsScrollView)
+        albumsScrollView.snp.makeConstraints { make in
             make.top.equalTo(albumsHeader.snp.bottom).offset(20)
-            make.left.right.equalToSuperview().inset(20)
+            make.left.right.equalToSuperview()
             make.height.equalTo(120)
             make.bottom.equalToSuperview().offset(-30) // Important for scrollView content size
+        }
+        
+        albumsStack.axis = .horizontal
+        albumsStack.spacing = 15
+        albumsStack.distribution = .fill
+        albumsScrollView.addSubview(albumsStack)
+        albumsStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.height.equalToSuperview()
         }
     }
     
@@ -205,6 +214,9 @@ class HomeViewController: BaseViewController {
             } else {
                 card = AlbumCardView()
                 albumsStack.addArrangedSubview(card)
+                card.snp.makeConstraints { make in
+                    make.width.equalTo(120) // 设定为120使其成为正方形，并支持横向滚动
+                }
             }
             
             // 修复：处理图片 URL

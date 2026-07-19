@@ -23,6 +23,7 @@
 		37F7919E2BB9D7A5A2B7FE7F /* DeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29FE1877E1DEC55892BD832A /* DeviceViewController.swift */; };
 		3A854CE1ED6ACCEE49D6E095 /* CommonAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E6E8BBDFAB5E82AB5CC143 /* CommonAPI.swift */; };
 		470C7E8170AF47EA06530DB9 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24029B95D7BD5F908F185CBF /* NetworkManager.swift */; };
+		505892F5300A271E008ED856 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 505892F4300A271E008ED856 /* StoreKit.framework */; };
 		52F7836B31EF5CD0F1B44F4D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9166042D1390307B44CC30F /* Assets.xcassets */; };
 		53BFF3133033C91943257E6C /* UIColor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2883DBD7073FA39B3DEC4330 /* UIColor+Extension.swift */; };
 		5F6305B784E10825D75E65AF /* SongViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EAAB6F1D1153C09E6EC9C37 /* SongViewController.swift */; };
@@ -41,6 +42,7 @@
 		A3609369C676BC8E011A6273 /* PurchaseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88B5CDF40E19E50AE9FF894 /* PurchaseModels.swift */; };
 		A6541BCA1363BED6A8EE4FB4 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC20521C9D52C71F64E00747 /* SnapKit */; };
 		A79291055A975FE9A89C4AA5 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E65CE46668467BEA41D208E2 /* Alamofire */; };
+		AABBCCDDEEFF001122334455 /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112233445566778899AABBCC /* IAPManager.swift */; };
 		ACFAB8C2777BA7353F8A687D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = B465A7CFC355047224018E31 /* Kingfisher */; };
 		B5B7AF0B7F2E71AD3F491ACE /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F633995977EF314EEA8866A /* AuthAPI.swift */; };
 		B5D1A5F9A69C24FA828DDF2C /* HomeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9DC101DB1167A8FC966B18 /* HomeModels.swift */; };
@@ -67,6 +69,7 @@
 		08D2E60BE011E467C6B6549B /* ActivationCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivationCodeViewController.swift; sourceTree = "<group>"; };
 		0E8F9D7DCDBCCF3F45F7F986 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		0EC10496ADBAE8C8ED38B9F1 /* AlbumAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumAPI.swift; sourceTree = "<group>"; };
+		112233445566778899AABBCC /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
 		149AB9A04F6DB8934C67E263 /* ExternalMembershipAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalMembershipAPI.swift; sourceTree = "<group>"; };
 		15E606B54D21130E862BB989 /* AlbumViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewController.swift; sourceTree = "<group>"; };
 		1F478B6CBF8ACA629BC053AD /* HomeAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeAPI.swift; sourceTree = "<group>"; };
@@ -83,6 +86,8 @@
 		3F893414F03439E4B67AD217 /* AgreementViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgreementViewController.swift; sourceTree = "<group>"; };
 		44DD6DC1205722B2DD171DC4 /* SongModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongModels.swift; sourceTree = "<group>"; };
 		4E29D228459C9E4A1850254E /* SongAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongAPI.swift; sourceTree = "<group>"; };
+		505892F4300A271E008ED856 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		505892F6300CC2F6008ED856 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		59E6E8BBDFAB5E82AB5CC143 /* CommonAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonAPI.swift; sourceTree = "<group>"; };
 		5DEE6CBCD45F7F4DF7EF3DA5 /* DeviceViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceViews.swift; sourceTree = "<group>"; };
 		6416A5CBA7434B850C790C67 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
@@ -124,6 +129,7 @@
 				A79291055A975FE9A89C4AA5 /* Alamofire in Frameworks */,
 				A6541BCA1363BED6A8EE4FB4 /* SnapKit in Frameworks */,
 				ACFAB8C2777BA7353F8A687D /* Kingfisher in Frameworks */,
+				505892F5300A271E008ED856 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,6 +292,14 @@
 			path = API;
 			sourceTree = "<group>";
 		};
+		505892F3300A271E008ED856 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				505892F4300A271E008ED856 /* StoreKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		557492E01BFBDC15C6763189 /* Purchase */ = {
 			isa = PBXGroup;
 			children = (
@@ -365,8 +379,10 @@
 		9256D8263AE9BCCCC7C64109 = {
 			isa = PBXGroup;
 			children = (
+				505892F6300CC2F6008ED856 /* Configuration.storekit */,
 				90EAD89EA15BC823F2084858 /* Resources */,
 				0AE78291A99FEDBE1541562E /* Sources */,
+				505892F3300A271E008ED856 /* Frameworks */,
 				7C25C0BEE52A325B9C735006 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -410,6 +426,7 @@
 		AD7E369EDAD2AED22F07B63B /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				112233445566778899AABBCC /* IAPManager.swift */,
 				23376B18C65966F84BCA0B9D /* AudioPlayerManager.swift */,
 				D0BDBFE7B020192EC08E13FD /* BluetoothManager.swift */,
 				84840CC6476D4BF184296331 /* UfiManager.swift */,
@@ -620,6 +637,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AABBCCDDEEFF001122334455 /* IAPManager.swift in Sources */,
 				8B3490197FCFC4D50ECD10C2 /* APIService.swift in Sources */,
 				7AF934BCD1106FF4ABF67BC0 /* ActivationCodeViewController.swift in Sources */,
 				D398BACEC025687C77D60CA3 /* AgreementViewController.swift in Sources */,

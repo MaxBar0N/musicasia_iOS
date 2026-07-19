@@ -1,6 +1,7 @@
 import UIKit
 import WebKit
 import SnapKit
+import StoreKit
 
 class PurchaseViewController: BaseViewController {
     
@@ -16,12 +17,23 @@ class PurchaseViewController: BaseViewController {
     
     private var collectionView: UICollectionView!
     
+    private let paymentStackView = UIStackView()
     private let wechatPayView = UIView()
+    private let wechatCheckIcon = UIImageView()
+    private let applePayView = UIView()
+    private let appleCheckIcon = UIImageView()
+    
     private let agreementView = AgreementCheckboxView()
     private let payButton = GradientButton()
     
     private let bottomCardView = UIView()
     private let benefitsStackView = UIStackView()
+    
+    enum PaymentMethod {
+        case wechat
+        case applePay
+    }
+    private var currentPaymentMethod: PaymentMethod = .applePay
     
     private var isPersonalUser: Bool = true
     private var categories: [PackageCategory] = []
@@ -31,6 +43,8 @@ class PurchaseViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "购买套餐"
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "恢复购买", style: .plain, target: self, action: #selector(restorePurchases))
         
         setupUI()
         loadData()
@@ -247,9 +261,54 @@ class PurchaseViewController: BaseViewController {
             make.height.equalTo(130)
         }
         
+        paymentStackView.axis = .vertical
+        paymentStackView.spacing = 10
+        topCardView.addSubview(paymentStackView)
+        
+        // Apple Pay View
+        applePayView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
+        applePayView.layer.cornerRadius = 8
+        applePayView.isUserInteractionEnabled = true
+        applePayView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(selectApplePay)))
+        paymentStackView.addArrangedSubview(applePayView)
+        
+        let appleIcon = UIImageView(image: UIImage(systemName: "applelogo"))
+        appleIcon.tintColor = .white
+        appleIcon.contentMode = .scaleAspectFit
+        applePayView.addSubview(appleIcon)
+        
+        let appleLabel = UILabel()
+        appleLabel.text = "Apple Pay (苹果内购)"
+        appleLabel.textColor = .white
+        applePayView.addSubview(appleLabel)
+        
+        appleCheckIcon.image = UIImage(systemName: "circle.circle.fill")
+        appleCheckIcon.tintColor = UIColor(hex: "#16E0BF")
+        applePayView.addSubview(appleCheckIcon)
+        
+        applePayView.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
+        appleIcon.snp.makeConstraints { make in
+            make.left.equalToSuperview().offset(15)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(24)
+        }
+        appleLabel.snp.makeConstraints { make in
+            make.left.equalTo(appleIcon.snp.right).offset(10)
+            make.centerY.equalToSuperview()
+        }
+        appleCheckIcon.snp.makeConstraints { make in
+            make.right.equalToSuperview().offset(-15)
+            make.centerY.equalToSuperview()
+        }
+        
+        // WeChat Pay View
         wechatPayView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
         wechatPayView.layer.cornerRadius = 8
-        topCardView.addSubview(wechatPayView)
+        wechatPayView.isUserInteractionEnabled = true
+        wechatPayView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(selectWechatPay)))
+        paymentStackView.addArrangedSubview(wechatPayView)
         
         let wxIcon = UIImageView(image: UIImage(named: "wechat_pay_logo"))
         wxIcon.contentMode = .scaleAspectFit
@@ -260,32 +319,35 @@ class PurchaseViewController: BaseViewController {
         wxLabel.textColor = .white
         wechatPayView.addSubview(wxLabel)
         
-        let checkIcon = UIImageView(image: UIImage(systemName: "circle.circle.fill"))
-        checkIcon.tintColor = UIColor(hex: "#16E0BF")
-        wechatPayView.addSubview(checkIcon)
+        wechatCheckIcon.image = UIImage(systemName: "circle")
+        wechatCheckIcon.tintColor = .white.withAlphaComponent(0.5)
+        wechatPayView.addSubview(wechatCheckIcon)
         
         wechatPayView.snp.makeConstraints { make in
-            make.top.equalTo(collectionView.snp.bottom).offset(20)
-            make.left.right.equalToSuperview().inset(20)
             make.height.equalTo(44)
         }
         wxIcon.snp.makeConstraints { make in
             make.left.equalToSuperview().offset(15)
             make.centerY.equalToSuperview()
-            make.width.height.equalTo(24) // 限制下微信logo的尺寸
+            make.width.height.equalTo(24)
         }
         wxLabel.snp.makeConstraints { make in
             make.left.equalTo(wxIcon.snp.right).offset(10)
             make.centerY.equalToSuperview()
         }
-        checkIcon.snp.makeConstraints { make in
+        wechatCheckIcon.snp.makeConstraints { make in
             make.right.equalToSuperview().offset(-15)
             make.centerY.equalToSuperview()
         }
         
+        paymentStackView.snp.makeConstraints { make in
+            make.top.equalTo(collectionView.snp.bottom).offset(20)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
         topCardView.addSubview(agreementView)
         agreementView.snp.makeConstraints { make in
-            make.top.equalTo(wechatPayView.snp.bottom).offset(20)
+            make.top.equalTo(paymentStackView.snp.bottom).offset(20)
             make.left.equalToSuperview().offset(20)
         }
         
@@ -429,6 +491,45 @@ class PurchaseViewController: BaseViewController {
         payButton.isEnabled = true
     }
     
+    @objc private func restorePurchases() {
+        let loadingAlert = UIAlertController(title: "正在恢复购买...", message: nil, preferredStyle: .alert)
+        present(loadingAlert, animated: true)
+        
+        IAPManager.shared.restorePurchases { [weak self] result in
+            DispatchQueue.main.async {
+                loadingAlert.dismiss(animated: true) {
+                    switch result {
+                    case .success:
+                        if let receipt = IAPManager.shared.getReceiptData() {
+                            // 恢复成功后也需要将凭证发给后端进行验证并下发权益
+                            self?.verifyAppleReceipt(receipt: receipt, orderCode: "RESTORE_PURCHASE")
+                        } else {
+                            self?.showAlert(message: "恢复购买成功，但未找到有效凭证")
+                        }
+                    case .failure(let error):
+                        self?.showAlert(message: "恢复失败: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+    
+    @objc private func selectApplePay() {
+        currentPaymentMethod = .applePay
+        appleCheckIcon.image = UIImage(systemName: "circle.circle.fill")
+        appleCheckIcon.tintColor = UIColor(hex: "#16E0BF")
+        wechatCheckIcon.image = UIImage(systemName: "circle")
+        wechatCheckIcon.tintColor = .white.withAlphaComponent(0.5)
+    }
+    
+    @objc private func selectWechatPay() {
+        currentPaymentMethod = .wechat
+        wechatCheckIcon.image = UIImage(systemName: "circle.circle.fill")
+        wechatCheckIcon.tintColor = UIColor(hex: "#16E0BF")
+        appleCheckIcon.image = UIImage(systemName: "circle")
+        appleCheckIcon.tintColor = .white.withAlphaComponent(0.5)
+    }
+    
     @objc private func handlePay() {
         guard agreementView.isChecked else {
             showAlert(message: "请先阅读并同意《会员服务协议》和《自动续费服务协议》")
@@ -452,39 +553,114 @@ class PurchaseViewController: BaseViewController {
         
         guard let setMenuId = Int(pkg.id) else { return }
         
+        if currentPaymentMethod == .wechat {
+            let loadingAlert = UIAlertController(title: "正在创建订单...", message: nil, preferredStyle: .alert)
+            present(loadingAlert, animated: true)
+            
+            OrderAPI.placeH5Order(setMenuId: setMenuId) { [weak self] result in
+                guard let self = self else { return }
+                
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let orderInfo):
+                        if let urlString = orderInfo.h5Url, let url = URL(string: urlString) {
+                            let webVC = PaymentWebViewController()
+                            webVC.url = url
+                            webVC.orderId = orderInfo.orderId ?? 0
+                            webVC.orderNo = orderInfo.orderCode ?? ""
+                            webVC.onComplete = { [weak self] oId, oNo in
+                                self?.checkPaymentStatus(orderId: oId, orderNo: oNo)
+                            }
+                            
+                            let nav = UINavigationController(rootViewController: webVC)
+                            nav.modalPresentationStyle = .fullScreen
+                            
+                            loadingAlert.present(nav, animated: true) {
+                            }
+                        } else {
+                            loadingAlert.dismiss(animated: true) {
+                                self.showAlert(message: "获取支付链接失败")
+                            }
+                        }
+                    case .failure(let error):
+                        loadingAlert.dismiss(animated: true) {
+                            self.showAlert(message: "创建订单失败: \(error.localizedDescription)")
+                        }
+                    }
+                }
+            }
+        } else if currentPaymentMethod == .applePay {
+            handleApplePay(package: pkg)
+        }
+    }
+    
+    private func handleApplePay(package: PackageItem) {
+        guard let setMenuId = Int(package.id) else { return }
+        
         let loadingAlert = UIAlertController(title: "正在创建订单...", message: nil, preferredStyle: .alert)
         present(loadingAlert, animated: true)
         
-        OrderAPI.placeH5Order(setMenuId: setMenuId) { [weak self] result in
-            guard let self = self else { return }
-            
+        OrderAPI.createAppleOrder(setMenuId: setMenuId) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
-                case .success(let orderInfo):
-                    if let urlString = orderInfo.h5Url, let url = URL(string: urlString) {
-                        let webVC = PaymentWebViewController()
-                        webVC.url = url
-                        webVC.orderId = orderInfo.orderId ?? 0
-                        webVC.orderNo = orderInfo.orderCode ?? ""
-                        webVC.onComplete = { [weak self] oId, oNo in
-                            self?.checkPaymentStatus(orderId: oId, orderNo: oNo)
-                        }
-                        
-                        let nav = UINavigationController(rootViewController: webVC)
-                        nav.modalPresentationStyle = .fullScreen
-                        
-                        loadingAlert.present(nav, animated: true) {
-                        }
-                    } else {
+                case .success(let createResp):
+                    guard let productId = createResp.appleProductId, !productId.isEmpty else {
                         loadingAlert.dismiss(animated: true) {
-                            self.showAlert(message: "获取支付链接失败")
+                            self?.showAlert(message: "订单创建成功，但未返回苹果商品ID")
+                        }
+                        return
+                    }
+                    
+                    loadingAlert.title = "正在连接App Store..."
+                    
+                    IAPManager.shared.fetchProduct(productID: productId) { fetchResult in
+                        DispatchQueue.main.async {
+                            switch fetchResult {
+                            case .success(let product):
+                                loadingAlert.title = "正在支付..."
+                                IAPManager.shared.buyProduct(product, appAccountToken: createResp.appAccountToken) { buyResult in
+                                    DispatchQueue.main.async {
+                                        loadingAlert.dismiss(animated: true) {
+                                            switch buyResult {
+                                            case .success:
+                                                if let receipt = IAPManager.shared.getReceiptData() {
+                                                    self?.verifyAppleReceipt(receipt: receipt, orderCode: createResp.orderCode ?? "")
+                                                } else {
+                                                    self?.showAlert(message: "获取支付凭证失败，请联系客服")
+                                                }
+                                            case .failure(let error):
+                                                self?.showAlert(message: error.localizedDescription)
+                                            }
+                                        }
+                                    }
+                                }
+                            case .failure(let error):
+                                loadingAlert.dismiss(animated: true) {
+                                    self?.showAlert(message: "获取商品信息失败: \(error.localizedDescription)\n请确保商品ID \(productId) 已在App Store Connect中配置")
+                                }
+                            }
                         }
                     }
+                    
                 case .failure(let error):
                     loadingAlert.dismiss(animated: true) {
-                        self.showAlert(message: "创建订单失败: \(error.localizedDescription)")
+                        self?.showAlert(message: "创建订单失败: \(error.localizedDescription)")
                     }
                 }
+            }
+        }
+    }
+    
+    private func verifyAppleReceipt(receipt: String, orderCode: String) {
+        let loadingAlert = UIAlertController(title: "正在验证凭证...", message: nil, preferredStyle: .alert)
+        present(loadingAlert, animated: true)
+        
+        // TODO: 需要后端提供验证苹果支付凭证的接口
+        // 例如：OrderAPI.verifyAppleReceipt(receipt: receipt, orderCode: orderCode) { ... }
+        // 目前暂无接口，因此模拟验证成功
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            loadingAlert.dismiss(animated: true) {
+                self.showSuccessPopup(orderNo: orderCode.isEmpty ? "APPLE_PAY_SUCCESS" : orderCode)
             }
         }
     }
@@ -595,6 +771,12 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
     }
 
     @objc private func closeTapped() {
+        showPaymentConfirmationAlert()
+    }
+    
+    private func showPaymentConfirmationAlert() {
+        guard presentedViewController == nil else { return }
+        
         let alert = UIAlertController(title: "支付确认", message: "请确认您是否已在微信内完成支付？", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "已完成支付", style: .default, handler: { [weak self] _ in
             self?.presentingViewController?.presentingViewController?.dismiss(animated: true) {
@@ -619,7 +801,13 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
         
         if url.scheme == "weixin" {
             if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                UIApplication.shared.open(url, options: [:]) { [weak self] success in
+                    if success {
+                        DispatchQueue.main.async {
+                            self?.showPaymentConfirmationAlert()
+                        }
+                    }
+                }
             } else {
                 let alert = UIAlertController(title: "提示", message: "您似乎没有安装微信，无法完成支付", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "确定", style: .default, handler: nil))

@@ -119,7 +119,7 @@ class NetworkManager {
     private let session: Session
     
     // 全局基础 URL
-    private let baseURL = "https://iosapi.musicasia.cn/prod-api"
+    private let baseURL = "https://iosapi.musicasia.cn/prod-api" //"https://www.musicasia.cn/prod-api"
     
     private init() {
         let configuration = URLSessionConfiguration.default

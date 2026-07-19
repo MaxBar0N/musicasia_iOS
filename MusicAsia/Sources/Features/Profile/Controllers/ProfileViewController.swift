@@ -382,11 +382,13 @@ class ProfileViewController: BaseViewController {
                 
                 self.hasMoreData = newSongs.count == self.pageSize
                 
-                let startIndex = self.displaySongs.count
+                let startIndex: Int
                 if self.currentPage == 1 {
                     self.displaySongs = uiSongs
                     self.songsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+                    startIndex = 0
                 } else {
+                    startIndex = self.displaySongs.count
                     self.displaySongs.append(contentsOf: uiSongs)
                 }
                 

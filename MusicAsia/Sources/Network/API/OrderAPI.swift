@@ -108,6 +108,13 @@ struct QueryOrderPayStatusResp: Decodable {
     let isPay: Bool?
 }
 
+struct AppleIapCreateResp: Decodable {
+    let appAccountToken: String?
+    let appleProductId: String?
+    let orderCode: String?
+    let orderId: Int?
+}
+
 class OrderAPI {
     
     // 获取订单分页列表
@@ -151,6 +158,19 @@ class OrderAPI {
             let data = try JSONEncoder().encode(body)
             if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                 NetworkManager.shared.request(APIService.Order.payH5, method: .post, parameters: params, completion: completion)
+            }
+        } catch {
+            completion(.failure(.decodingError))
+        }
+    }
+    
+    // 苹果内购下单
+    static func createAppleOrder(setMenuId: Int, completion: @escaping (Result<AppleIapCreateResp, NetworkError>) -> Void) {
+        let body = PlaceOrderReq(setMenuId: setMenuId)
+        do {
+            let data = try JSONEncoder().encode(body)
+            if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                NetworkManager.shared.request(APIService.Order.payAppleCreate, method: .post, parameters: params, completion: completion)
             }
         } catch {
             completion(.failure(.decodingError))
