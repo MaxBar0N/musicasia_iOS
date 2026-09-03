@@ -34,24 +34,48 @@ class AuthAPI {
     
     // MARK: - 发送验证码
     static func sendLoginCode(phone: String, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        sendCode(endpoint: APIService.Auth.sendCodeLogin, phone: phone, attempt: 1, completion: completion)
+    }
+
+    static func sendRegisterCode(phone: String, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        sendCode(endpoint: APIService.Auth.sendCodeRegister, phone: phone, attempt: 1, completion: completion)
+    }
+
+    /// 统一发送验证码逻辑：首次请求偶发失败（后端冷启动 / 限流 / 连接预热）时自动重试，
+    /// 避免「第一次发送失败、第二次才成功」的情况直接暴露给用户。
+    private static func sendCode(endpoint: String, phone: String, attempt: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
         let params: [String: Any] = ["phone": phone]
-        // 尝试发送到新接口，如果失败也可以在此处配置自动 fallback 到另一个接口，但建议跟后端沟通确认统一的接口
-        NetworkManager.shared.request(APIService.Auth.sendCodeLogin, method: .post, parameters: params) { (result: Result<AnyDecodableValue, NetworkError>) in
+        NetworkManager.shared.request(endpoint, method: .post, parameters: params) { (result: Result<AnyDecodableValue, NetworkError>) in
             switch result {
             case .success:
                 completion(.success("验证码发送成功"))
             case .failure(let error):
-                // 暂时放宽对 500 的容忍，因为你提到第二次能成功，也可能是后端的限流或偶发错误
-                completion(.failure(error))
+                if attempt < 3 && isTransientError(error) {
+                    // 瞬时错误自动重试，最多 3 次，间隔递增，避免打断倒计时
+                    let delay = 1.0 * Double(attempt)
+                    DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+                        sendCode(endpoint: endpoint, phone: phone, attempt: attempt + 1, completion: completion)
+                    }
+                } else {
+                    completion(.failure(error))
+                }
             }
         }
     }
-    
-    static func sendRegisterCode(phone: String, completion: @escaping (Result<String?, NetworkError>) -> Void) {
-        let params: [String: Any] = ["phone": phone]
-        NetworkManager.shared.request(APIService.Auth.sendCodeRegister, method: .post, parameters: params, completion: completion)
+
+    /// 判断是否为可重试的瞬时错误（服务器 5xx、超时、网络不可用等）。
+    /// 注意 401（未注册）等业务错误不重试，直接交由上层处理。
+    private static func isTransientError(_ error: NetworkError) -> Bool {
+        switch error {
+        case .serverError(let statusCode, _):
+            return statusCode >= 500 || statusCode == -1001 || statusCode == -1009
+        case .unknown:
+            return true
+        default:
+            return false
+        }
     }
-    
+
     // MARK: - 登录与注册
     static func login(phone: String, code: String, completion: @escaping (Result<String?, NetworkError>) -> Void) {
         let params: [String: Any] = ["username": phone, "code": code]

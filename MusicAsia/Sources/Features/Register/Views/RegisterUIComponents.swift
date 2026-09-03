@@ -717,14 +717,14 @@ extension AgreementCheckboxView: UITextViewDelegate {
         if URL.absoluteString == "musicasia://agreement" {
             let vc = AgreementViewController()
             vc.agreementTitle = "使用协议"
-            vc.urlString = "https://www.musicasia.cn/agreement"
+            vc.urlString = APIConfig.agreementURL
             vc.hidesBottomBarWhenPushed = true
             parentViewController?.navigationController?.pushViewController(vc, animated: true)
             return false
         } else if URL.absoluteString == "musicasia://privacy" {
             let vc = AgreementViewController()
             vc.agreementTitle = "隐私协议"
-            vc.urlString = "https://www.musicasia.cn/privacy"
+            vc.urlString = APIConfig.privacyURL
             vc.hidesBottomBarWhenPushed = true
             parentViewController?.navigationController?.pushViewController(vc, animated: true)
             return false

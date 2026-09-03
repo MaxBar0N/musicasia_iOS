@@ -119,7 +119,7 @@ class NetworkManager {
     private let session: Session
     
     // 全局基础 URL
-    private let baseURL = "https://iosapi.musicasia.cn/prod-api" //"https://www.musicasia.cn/prod-api"
+    private let baseURL = APIConfig.baseURL
     
     private init() {
         let configuration = URLSessionConfiguration.default
@@ -128,7 +128,7 @@ class NetworkManager {
         
         // 忽略 SSL 证书校验（针对测试环境或证书不匹配的情况）
         let serverTrustManager = ServerTrustManager(evaluators: [
-            "iosapi.musicasia.cn": DisabledTrustEvaluator()
+            APIConfig.host: DisabledTrustEvaluator()
         ])
         
         self.session = Session(configuration: configuration, serverTrustManager: serverTrustManager)

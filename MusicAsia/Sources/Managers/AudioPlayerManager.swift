@@ -7,6 +7,7 @@ class AudioPlayerManager {
     
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
+    private var statusObservation: NSKeyValueObservation?
     
     var isPlaying: Bool {
         return player?.rate != 0 && player?.error == nil
@@ -22,10 +23,29 @@ class AudioPlayerManager {
     }
     
     func play(url: URL) {
+        statusObservation?.invalidate()
+        statusObservation = nil
+
         playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
+
+        // 监听播放项状态，加载失败时重置播放状态
+        statusObservation = playerItem?.observe(\.status, options: [.new]) { [weak self] item, _ in
+            DispatchQueue.main.async {
+                if item.status == .failed {
+                    self?.handlePlaybackFailure()
+                }
+            }
+        }
+
         player?.play()
         NotificationCenter.default.post(name: NSNotification.Name("PlayerStateChanged"), object: nil)
+    }
+
+    private func handlePlaybackFailure() {
+        print("❌ 音频加载失败，重置播放状态")
+        stop()
+        NotificationCenter.default.post(name: NSNotification.Name("PlaybackFailed"), object: nil)
     }
     
     func pause() {
@@ -40,6 +60,8 @@ class AudioPlayerManager {
     
     func stop() {
         player?.pause()
+        statusObservation?.invalidate()
+        statusObservation = nil
         player = nil
         playerItem = nil
         NotificationCenter.default.post(name: NSNotification.Name("PlayerStateChanged"), object: nil)
@@ -52,12 +74,32 @@ class SongPlaybackManager {
     var currentSongName: String?
     var currentSongSecret: String?
     
-    private init() {}
-    
+    private init() {
+        // 监听播放失败通知，清除当前歌曲标记
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handlePlaybackFailed),
+            name: NSNotification.Name("PlaybackFailed"),
+            object: nil
+        )
+    }
+
+    @objc private func handlePlaybackFailed() {
+        currentSongName = nil
+        currentSongSecret = nil
+    }
+
     func stop() {
         AudioPlayerManager.shared.stop()
         currentSongName = nil
         currentSongSecret = nil
+    }
+
+    /// 播放失败时重置为最初始状态：清除当前歌曲并停止播放
+    private func resetToInitialState() {
+        currentSongName = nil
+        currentSongSecret = nil
+        AudioPlayerManager.shared.stop()
     }
     
     /// 统一的播放鉴权与解密逻辑
@@ -176,6 +218,9 @@ class SongPlaybackManager {
             if let url = URL(string: playUrl) {
                 AudioPlayerManager.shared.play(url: url)
                 self.showPlayerPopup(songName: songName, url: playUrl, in: viewController)
+            } else {
+                self.resetToInitialState()
+                self.showAlert(message: "歌曲链接无效，无法播放", in: viewController)
             }
         } else {
             print("⏳ 请求后台解密联通 URL...")
@@ -187,8 +232,12 @@ class SongPlaybackManager {
                         if let url = URL(string: decryptedUrlStr) {
                             AudioPlayerManager.shared.play(url: url)
                             self?.showPlayerPopup(songName: songName, url: decryptedUrlStr, in: viewController)
+                        } else {
+                            self?.resetToInitialState()
+                            self?.showAlert(message: "歌曲链接无效，无法播放", in: viewController)
                         }
                     case .failure(let error):
+                        self?.resetToInitialState()
                         self?.showAlert(message: "解密歌曲失败: \(error.localizedDescription)", in: viewController)
                     }
                 }

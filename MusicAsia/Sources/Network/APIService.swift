@@ -54,6 +54,7 @@ struct APIService {
         static let payH5 = "/phone/order/pay/h5"
         static let checkPayment = "/phone/order/checkPayment"
         static let payAppleCreate = "/phone/order/pay/apple/create"
+        static let payAppleVerify = "/phone/order/pay/apple/verify"
     }
     
     struct Common {

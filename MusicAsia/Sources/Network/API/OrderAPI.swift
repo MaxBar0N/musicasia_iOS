@@ -115,6 +115,11 @@ struct AppleIapCreateResp: Decodable {
     let orderId: Int?
 }
 
+struct AppleIapVerifyReq: Encodable {
+    let orderId: Int
+    let signedTransactionInfo: String
+}
+
 class OrderAPI {
     
     // 获取订单分页列表
@@ -177,6 +182,19 @@ class OrderAPI {
         }
     }
     
+    // 苹果内购支付凭证验证
+    static func verifyAppleReceipt(orderId: Int, signedTransactionInfo: String, completion: @escaping (Result<QueryOrderPayStatusResp, NetworkError>) -> Void) {
+        let body = AppleIapVerifyReq(orderId: orderId, signedTransactionInfo: signedTransactionInfo)
+        do {
+            let data = try JSONEncoder().encode(body)
+            if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                NetworkManager.shared.request(APIService.Order.payAppleVerify, method: .post, parameters: params, completion: completion)
+            }
+        } catch {
+            completion(.failure(.decodingError))
+        }
+    }
+
     // 查询订单支付状态
     static func checkPayment(orderId: Int, completion: @escaping (Result<QueryOrderPayStatusResp, NetworkError>) -> Void) {
         let body = OrderPaymentQueryReq(orderId: orderId)

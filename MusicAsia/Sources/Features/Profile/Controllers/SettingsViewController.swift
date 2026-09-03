@@ -64,7 +64,7 @@ class SettingsViewController: BaseViewController {
                         }
                     }
                     if !logoUrl.isEmpty && !logoUrl.hasPrefix("http") {
-                        logoUrl = "https://iosapi.musicasia.cn" + (logoUrl.hasPrefix("/") ? "" : "/") + logoUrl
+                        logoUrl = APIConfig.webBaseURL + (logoUrl.hasPrefix("/") ? "" : "/") + logoUrl
                     }
                     logoUrl = logoUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? logoUrl
                     
@@ -216,7 +216,7 @@ class SettingsViewController: BaseViewController {
     @objc private func handleUserAgreement() {
         let vc = AgreementViewController()
         vc.agreementTitle = "使用协议"
-        vc.urlString = "https://www.musicasia.cn/agreement"
+        vc.urlString = APIConfig.agreementURL
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -224,7 +224,7 @@ class SettingsViewController: BaseViewController {
     @objc private func handlePrivacyPolicy() {
         let vc = AgreementViewController()
         vc.agreementTitle = "隐私协议"
-        vc.urlString = "https://www.musicasia.cn/privacy"
+        vc.urlString = APIConfig.privacyURL
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }

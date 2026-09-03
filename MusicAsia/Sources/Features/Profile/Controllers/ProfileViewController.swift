@@ -352,7 +352,7 @@ class ProfileViewController: BaseViewController {
                       }
                   }
                   if !logoUrl.isEmpty && !logoUrl.hasPrefix("http") {
-                      logoUrl = "https://iosapi.musicasia.cn" + (logoUrl.hasPrefix("/") ? "" : "/") + logoUrl
+                      logoUrl = APIConfig.webBaseURL + (logoUrl.hasPrefix("/") ? "" : "/") + logoUrl
                   }
                   logoUrl = logoUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? logoUrl
                   

@@ -1,0 +1,54 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "6712DF32",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "38",
+      "familyShareable" : false,
+      "internalID" : "A1B2C3D4",
+      "localizations" : [
+        {
+          "description" : "月度VIP会员",
+          "displayName" : "月套餐",
+          "locale" : "zh_Hans"
+        }
+      ],
+      "productID" : "month",
+      "referenceName" : "个月",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "zh_Hans",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "CHN",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 5,
+    "minor" : 0
+  }
+}

@@ -231,7 +231,7 @@ class HomeViewController: BaseViewController {
             }
             
             if !imageUrl.isEmpty && !imageUrl.hasPrefix("http") {
-                imageUrl = "https://iosapi.musicasia.cn" + (imageUrl.hasPrefix("/") ? "" : "/") + imageUrl
+                imageUrl = APIConfig.webBaseURL + (imageUrl.hasPrefix("/") ? "" : "/") + imageUrl
             }
             
             // 避免重复编码

@@ -34,6 +34,12 @@ class PurchaseViewController: BaseViewController {
         case applePay
     }
     private var currentPaymentMethod: PaymentMethod = .applePay
+
+    /// 暂时屏蔽微信支付：设为 false 后隐藏微信支付入口，改为 true 恢复
+    private let isWechatPayEnabled = false
+
+    /// 暂时屏蔽右上角“恢复购买”：设为 false 后隐藏，改为 true 恢复
+    private let isRestorePurchaseEnabled = false
     
     private var isPersonalUser: Bool = true
     private var categories: [PackageCategory] = []
@@ -44,7 +50,9 @@ class PurchaseViewController: BaseViewController {
         super.viewDidLoad()
         title = "购买套餐"
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "恢复购买", style: .plain, target: self, action: #selector(restorePurchases))
+        if isRestorePurchaseEnabled {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "恢复购买", style: .plain, target: self, action: #selector(restorePurchases))
+        }
         
         setupUI()
         loadData()
@@ -304,40 +312,42 @@ class PurchaseViewController: BaseViewController {
         }
         
         // WeChat Pay View
-        wechatPayView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
-        wechatPayView.layer.cornerRadius = 8
-        wechatPayView.isUserInteractionEnabled = true
-        wechatPayView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(selectWechatPay)))
-        paymentStackView.addArrangedSubview(wechatPayView)
-        
-        let wxIcon = UIImageView(image: UIImage(named: "wechat_pay_logo"))
-        wxIcon.contentMode = .scaleAspectFit
-        wechatPayView.addSubview(wxIcon)
-        
-        let wxLabel = UILabel()
-        wxLabel.text = "微信支付"
-        wxLabel.textColor = .white
-        wechatPayView.addSubview(wxLabel)
-        
-        wechatCheckIcon.image = UIImage(systemName: "circle")
-        wechatCheckIcon.tintColor = .white.withAlphaComponent(0.5)
-        wechatPayView.addSubview(wechatCheckIcon)
-        
-        wechatPayView.snp.makeConstraints { make in
-            make.height.equalTo(44)
-        }
-        wxIcon.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(15)
-            make.centerY.equalToSuperview()
-            make.width.height.equalTo(24)
-        }
-        wxLabel.snp.makeConstraints { make in
-            make.left.equalTo(wxIcon.snp.right).offset(10)
-            make.centerY.equalToSuperview()
-        }
-        wechatCheckIcon.snp.makeConstraints { make in
-            make.right.equalToSuperview().offset(-15)
-            make.centerY.equalToSuperview()
+        if isWechatPayEnabled {
+            wechatPayView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
+            wechatPayView.layer.cornerRadius = 8
+            wechatPayView.isUserInteractionEnabled = true
+            wechatPayView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(selectWechatPay)))
+            paymentStackView.addArrangedSubview(wechatPayView)
+
+            let wxIcon = UIImageView(image: UIImage(named: "wechat_pay_logo"))
+            wxIcon.contentMode = .scaleAspectFit
+            wechatPayView.addSubview(wxIcon)
+
+            let wxLabel = UILabel()
+            wxLabel.text = "微信支付"
+            wxLabel.textColor = .white
+            wechatPayView.addSubview(wxLabel)
+
+            wechatCheckIcon.image = UIImage(systemName: "circle")
+            wechatCheckIcon.tintColor = .white.withAlphaComponent(0.5)
+            wechatPayView.addSubview(wechatCheckIcon)
+
+            wechatPayView.snp.makeConstraints { make in
+                make.height.equalTo(44)
+            }
+            wxIcon.snp.makeConstraints { make in
+                make.left.equalToSuperview().offset(15)
+                make.centerY.equalToSuperview()
+                make.width.height.equalTo(24)
+            }
+            wxLabel.snp.makeConstraints { make in
+                make.left.equalTo(wxIcon.snp.right).offset(10)
+                make.centerY.equalToSuperview()
+            }
+            wechatCheckIcon.snp.makeConstraints { make in
+                make.right.equalToSuperview().offset(-15)
+                make.centerY.equalToSuperview()
+            }
         }
         
         paymentStackView.snp.makeConstraints { make in
@@ -501,8 +511,8 @@ class PurchaseViewController: BaseViewController {
                     switch result {
                     case .success:
                         if let receipt = IAPManager.shared.getReceiptData() {
-                            // 恢复成功后也需要将凭证发给后端进行验证并下发权益
-                            self?.verifyAppleReceipt(receipt: receipt, orderCode: "RESTORE_PURCHASE")
+                            // 恢复成功后也将凭证发给后端进行验证并下发权益
+                            self?.verifyAppleReceiptFallback(receipt: receipt, orderId: 0, orderCode: "RESTORE_PURCHASE")
                         } else {
                             self?.showAlert(message: "恢复购买成功，但未找到有效凭证")
                         }
@@ -596,10 +606,10 @@ class PurchaseViewController: BaseViewController {
     
     private func handleApplePay(package: PackageItem) {
         guard let setMenuId = Int(package.id) else { return }
-        
+
         let loadingAlert = UIAlertController(title: "正在创建订单...", message: nil, preferredStyle: .alert)
         present(loadingAlert, animated: true)
-        
+
         OrderAPI.createAppleOrder(setMenuId: setMenuId) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
@@ -610,30 +620,69 @@ class PurchaseViewController: BaseViewController {
                         }
                         return
                     }
-                    
+
+                    let orderId = createResp.orderId ?? 0
+                    let orderCode = createResp.orderCode ?? ""
+                    let appAccountToken = createResp.appAccountToken
+
+                    print("🛒 [PurchaseVC] 后端返回 appleProductId: \(productId)")
+                    print("🛒 [PurchaseVC] 后端返回 orderId: \(orderId)")
+                    print("🛒 [PurchaseVC] 后端返回 orderCode: \(orderCode)")
+                    print("🛒 [PurchaseVC] 后端返回 appAccountToken: \(appAccountToken ?? "nil")")
+
                     loadingAlert.title = "正在连接App Store..."
-                    
+
                     IAPManager.shared.fetchProduct(productID: productId) { fetchResult in
                         DispatchQueue.main.async {
                             switch fetchResult {
                             case .success(let product):
                                 loadingAlert.title = "正在支付..."
-                                IAPManager.shared.buyProduct(product, appAccountToken: createResp.appAccountToken) { buyResult in
-                                    DispatchQueue.main.async {
-                                        loadingAlert.dismiss(animated: true) {
-                                            switch buyResult {
-                                            case .success:
-                                                if let receipt = IAPManager.shared.getReceiptData() {
-                                                    self?.verifyAppleReceipt(receipt: receipt, orderCode: createResp.orderCode ?? "")
-                                                } else {
-                                                    self?.showAlert(message: "获取支付凭证失败，请联系客服")
+
+                                if #available(iOS 15.0, *) {
+                                    // iOS 15+：StoreKit 2 购买，获取 JWS 用于服务端验证
+                                    IAPManager.shared.buyProductAndGetTransactionInfo(
+                                        productID: productId,
+                                        appAccountToken: appAccountToken
+                                    ) { buyResult in
+                                        DispatchQueue.main.async {
+                                            loadingAlert.dismiss(animated: true) {
+                                                switch buyResult {
+                                                case .success(let signedTransactionInfo):
+                                                    self?.verifyAppleReceipt(
+                                                        orderId: orderId,
+                                                        orderCode: orderCode,
+                                                        signedTransactionInfo: signedTransactionInfo
+                                                    )
+                                                case .failure(let error):
+                                                    self?.showAlert(message: error.localizedDescription)
                                                 }
-                                            case .failure(let error):
-                                                self?.showAlert(message: error.localizedDescription)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // iOS 14：StoreKit 1 购买 + receipt 验证
+                                    IAPManager.shared.buyProduct(product, appAccountToken: appAccountToken) { buyResult in
+                                        DispatchQueue.main.async {
+                                            loadingAlert.dismiss(animated: true) {
+                                                switch buyResult {
+                                                case .success:
+                                                    if let receipt = IAPManager.shared.getReceiptData() {
+                                                        self?.verifyAppleReceiptFallback(
+                                                            receipt: receipt,
+                                                            orderId: orderId,
+                                                            orderCode: orderCode
+                                                        )
+                                                    } else {
+                                                        self?.showAlert(message: "获取支付凭证失败，请联系客服")
+                                                    }
+                                                case .failure(let error):
+                                                    self?.showAlert(message: error.localizedDescription)
+                                                }
                                             }
                                         }
                                     }
                                 }
+
                             case .failure(let error):
                                 loadingAlert.dismiss(animated: true) {
                                     self?.showAlert(message: "获取商品信息失败: \(error.localizedDescription)\n请确保商品ID \(productId) 已在App Store Connect中配置")
@@ -641,7 +690,7 @@ class PurchaseViewController: BaseViewController {
                             }
                         }
                     }
-                    
+
                 case .failure(let error):
                     loadingAlert.dismiss(animated: true) {
                         self?.showAlert(message: "创建订单失败: \(error.localizedDescription)")
@@ -650,17 +699,53 @@ class PurchaseViewController: BaseViewController {
             }
         }
     }
-    
-    private func verifyAppleReceipt(receipt: String, orderCode: String) {
+
+    /// iOS 15+：使用 StoreKit 2 JWS 验证票据
+    private func verifyAppleReceipt(orderId: Int, orderCode: String, signedTransactionInfo: String) {
         let loadingAlert = UIAlertController(title: "正在验证凭证...", message: nil, preferredStyle: .alert)
         present(loadingAlert, animated: true)
-        
-        // TODO: 需要后端提供验证苹果支付凭证的接口
-        // 例如：OrderAPI.verifyAppleReceipt(receipt: receipt, orderCode: orderCode) { ... }
-        // 目前暂无接口，因此模拟验证成功
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            loadingAlert.dismiss(animated: true) {
-                self.showSuccessPopup(orderNo: orderCode.isEmpty ? "APPLE_PAY_SUCCESS" : orderCode)
+
+        print("🛒 [PurchaseVC] 服务端票据验证: orderId=\(orderId)")
+
+        OrderAPI.verifyAppleReceipt(orderId: orderId, signedTransactionInfo: signedTransactionInfo) { [weak self] result in
+            DispatchQueue.main.async {
+                loadingAlert.dismiss(animated: true) {
+                    switch result {
+                    case .success(let resp):
+                        if resp.isPay == true {
+                            self?.showSuccessPopup(orderNo: orderCode.isEmpty ? "APPLE_PAY_SUCCESS" : orderCode)
+                        } else {
+                            self?.showAlert(message: "支付验证未通过，请联系客服")
+                        }
+                    case .failure(let error):
+                        self?.showAlert(message: "凭证验证失败: \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+
+    /// iOS 14 回退方案：使用 receipt data 验证票据
+    private func verifyAppleReceiptFallback(receipt: String, orderId: Int, orderCode: String) {
+        let loadingAlert = UIAlertController(title: "正在验证凭证...", message: nil, preferredStyle: .alert)
+        present(loadingAlert, animated: true)
+
+        print("🛒 [PurchaseVC] iOS 14 receipt 验证: orderId=\(orderId)")
+
+        OrderAPI.verifyAppleReceipt(orderId: orderId, signedTransactionInfo: receipt) { [weak self] result in
+            DispatchQueue.main.async {
+                loadingAlert.dismiss(animated: true) {
+                    switch result {
+                    case .success(let resp):
+                        if resp.isPay == true {
+                            self?.showSuccessPopup(orderNo: orderCode.isEmpty ? "APPLE_PAY_SUCCESS" : orderCode)
+                        } else {
+                            self?.showAlert(message: "支付验证未通过，请联系客服")
+                        }
+                    case .failure(let error):
+                        self?.showAlert(message: "凭证验证失败: \(error.localizedDescription)")
+                    }
+                }
             }
         }
     }
@@ -766,7 +851,7 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
         activityIndicator.startAnimating()
 
         var request = URLRequest(url: url)
-        request.setValue("https://www.musicasia.cn/", forHTTPHeaderField: "Referer")
+        request.setValue(APIConfig.payReferer, forHTTPHeaderField: "Referer")
         webView.load(request)
     }
 
@@ -822,13 +907,13 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
             let components = URLComponents(string: urlString)
             let currentRedirect = components?.queryItems?.first(where: { $0.name == "redirect_url" })?.value
             
-            if referer != "https://www.musicasia.cn/" || currentRedirect != "www.musicasia.cn://" {
+            if referer != APIConfig.payReferer || currentRedirect != APIConfig.payRedirectScheme {
                 decisionHandler(.cancel)
                 
                 var finalUrlString = urlString
                 if var comps = URLComponents(string: urlString) {
                     var queryItems = comps.queryItems?.filter { $0.name != "redirect_url" } ?? []
-                    queryItems.append(URLQueryItem(name: "redirect_url", value: "www.musicasia.cn://"))
+                    queryItems.append(URLQueryItem(name: "redirect_url", value: APIConfig.payRedirectScheme))
                     comps.queryItems = queryItems
                     if let newUrl = comps.url {
                         finalUrlString = newUrl.absoluteString
@@ -837,7 +922,7 @@ class PaymentWebViewController: BaseViewController, WKNavigationDelegate {
                 
                 guard let newURL = URL(string: finalUrlString) else { return }
                 var newRequest = URLRequest(url: newURL)
-                newRequest.setValue("https://www.musicasia.cn/", forHTTPHeaderField: "Referer")
+                newRequest.setValue(APIConfig.payReferer, forHTTPHeaderField: "Referer")
                 webView.load(newRequest)
                 return
             }

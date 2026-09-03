@@ -39,6 +39,7 @@
 		994A7D61C2ACE86DCEA3D585 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BDBFE7B020192EC08E13FD /* BluetoothManager.swift */; };
 		A0E8FAB0683A3DDCA2A4F305 /* AlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E606B54D21130E862BB989 /* AlbumViewController.swift */; };
 		A1B02FD0A9DBC24D0D1BDE76 /* DeviceViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DEE6CBCD45F7F4DF7EF3DA5 /* DeviceViews.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1B2C3D4E5F6A7B8C9D0E1F /* APIConfig.swift */; };
 		A3609369C676BC8E011A6273 /* PurchaseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88B5CDF40E19E50AE9FF894 /* PurchaseModels.swift */; };
 		A6541BCA1363BED6A8EE4FB4 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC20521C9D52C71F64E00747 /* SnapKit */; };
 		A79291055A975FE9A89C4AA5 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E65CE46668467BEA41D208E2 /* Alamofire */; };
@@ -67,6 +68,7 @@
 /* Begin PBXFileReference section */
 		07D726BB5AB519FB3C788994 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		08D2E60BE011E467C6B6549B /* ActivationCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivationCodeViewController.swift; sourceTree = "<group>"; };
+		0A1B2C3D4E5F6A7B8C9D0E1F /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfig.swift; sourceTree = "<group>"; };
 		0E8F9D7DCDBCCF3F45F7F986 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		0EC10496ADBAE8C8ED38B9F1 /* AlbumAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumAPI.swift; sourceTree = "<group>"; };
 		112233445566778899AABBCC /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
@@ -87,7 +89,7 @@
 		44DD6DC1205722B2DD171DC4 /* SongModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongModels.swift; sourceTree = "<group>"; };
 		4E29D228459C9E4A1850254E /* SongAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongAPI.swift; sourceTree = "<group>"; };
 		505892F4300A271E008ED856 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		505892F6300CC2F6008ED856 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
+		507A5137300D3FBD008B776B /* MusicAsia.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = MusicAsia.storekit; sourceTree = "<group>"; };
 		59E6E8BBDFAB5E82AB5CC143 /* CommonAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonAPI.swift; sourceTree = "<group>"; };
 		5DEE6CBCD45F7F4DF7EF3DA5 /* DeviceViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceViews.swift; sourceTree = "<group>"; };
 		6416A5CBA7434B850C790C67 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
@@ -379,7 +381,7 @@
 		9256D8263AE9BCCCC7C64109 = {
 			isa = PBXGroup;
 			children = (
-				505892F6300CC2F6008ED856 /* Configuration.storekit */,
+				507A5137300D3FBD008B776B /* MusicAsia.storekit */,
 				90EAD89EA15BC823F2084858 /* Resources */,
 				0AE78291A99FEDBE1541562E /* Sources */,
 				505892F3300A271E008ED856 /* Frameworks */,
@@ -492,6 +494,7 @@
 			children = (
 				6416A5CBA7434B850C790C67 /* APIService.swift */,
 				24029B95D7BD5F908F185CBF /* NetworkManager.swift */,
+				0A1B2C3D4E5F6A7B8C9D0E1F /* APIConfig.swift */,
 				14D57554A5054543A3BB50FC /* API */,
 			);
 			path = Network;
@@ -665,6 +668,7 @@
 				64A87C9848F25141C36DB89E /* LoginViewController.swift in Sources */,
 				6A294013C8AD821C5F60C275 /* MainTabBarController.swift in Sources */,
 				470C7E8170AF47EA06530DB9 /* NetworkManager.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* APIConfig.swift in Sources */,
 				6CF7F2C35C9E9D2D40F86769 /* OrderAPI.swift in Sources */,
 				257122296CC8452370072194 /* OrderListViewController.swift in Sources */,
 				EB6F5E0817BC665105851860 /* OrderModels.swift in Sources */,
