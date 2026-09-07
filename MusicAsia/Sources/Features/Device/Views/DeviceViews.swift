@@ -3,40 +3,60 @@ import SnapKit
 
 // MARK: - Empty State View
 class DeviceEmptyView: UIView {
-    
+
+    var onBindTapped: (() -> Void)?
+
+    private let bindButton = GradientButton()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         isUserInteractionEnabled = true
-        
+
         let imageView = UIImageView(image: UIImage(named: "add_device_image"))
         imageView.contentMode = .scaleAspectFit
         addSubview(imageView)
-        
+
         imageView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview().offset(-50)
+            make.centerY.equalToSuperview().offset(-80)
             make.width.equalTo(200)
             make.height.equalTo(140)
         }
-        
+
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 5
         stack.isUserInteractionEnabled = true
         addSubview(stack)
-        
+
         let text1 = UILabel()
         text1.text = "暂无设备"
         text1.textColor = UIColor.white.withAlphaComponent(0.8)
         text1.font = .systemFont(ofSize: 14)
         stack.addArrangedSubview(text1)
-        
+
         stack.snp.makeConstraints { make in
             make.top.equalTo(imageView.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
+
+        bindButton.setTitle("绑定设备", for: .normal)
+        bindButton.customCornerRadius = 22
+        bindButton.addTarget(self, action: #selector(bindTapped), for: .touchUpInside)
+        addSubview(bindButton)
+
+        bindButton.snp.makeConstraints { make in
+            make.top.equalTo(stack.snp.bottom).offset(24)
+            make.centerX.equalToSuperview()
+            make.width.equalTo(160)
+            make.height.equalTo(44)
+        }
     }
-    
+
+    @objc private func bindTapped() {
+        onBindTapped?()
+    }
+
     required init?(coder: NSCoder) { fatalError() }
 }
 
@@ -70,6 +90,8 @@ class DeviceRowView: UIView {
         deleteButton.setImage(UIImage(systemName: "trash"), for: .normal)
         deleteButton.tintColor = .white
         deleteButton.addTarget(self, action: #selector(deleteAction), for: .touchUpInside)
+        // 暂时屏蔽删除按钮，因为后端尚未提供删除接口
+        deleteButton.isHidden = true
         addSubview(deleteButton)
         
         nameLabel.snp.makeConstraints { make in
@@ -81,12 +103,15 @@ class DeviceRowView: UIView {
         deleteButton.snp.makeConstraints { make in
             make.right.equalToSuperview().offset(-15)
             make.centerY.equalToSuperview()
-            make.width.height.equalTo(30)
+            // 将宽度设为 0，避免占据空间影响布局
+            make.width.equalTo(0)
+            make.height.equalTo(30)
         }
         
         serialContainerView.snp.makeConstraints { make in
             make.left.equalTo(nameLabel.snp.right).offset(5)
-            make.right.equalTo(deleteButton.snp.left).offset(-15)
+            // 原本是 offset(-15) 依赖 deleteButton 的 left，因为删除了宽度，可以直接靠右
+            make.right.equalToSuperview().offset(-15)
             make.centerY.equalToSuperview()
             make.height.equalTo(36)
         }

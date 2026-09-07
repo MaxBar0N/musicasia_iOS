@@ -1,4 +1,5 @@
 import Foundation
+import Alamofire
 
 struct UserDeviceResp: Decodable {
     let voList: [UserDeviceVO]?
@@ -21,14 +22,14 @@ class DeviceAPI {
     
     // 绑定设备
     static func bindDevice(deviceCode: String, completion: @escaping (Result<String?, NetworkError>) -> Void) {
-        let body = UserDeviceCreateReq(deviceCode: deviceCode)
-        do {
-            let data = try JSONEncoder().encode(body)
-            if let params = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                NetworkManager.shared.request(APIService.User.bindingDevice, method: .post, parameters: params, completion: completion)
-            }
-        } catch {
-            completion(.failure(.decodingError))
-        }
+        let params: [String: Any] = [
+            "deviceCode": deviceCode
+        ]
+        // 后端日志明确指出："JSON parse error: Unrecognized token 'deviceCode'"
+        // 这说明后端框架 (Spring) 实际上在尝试用 Jackson 解析 JSON Body，
+        // 而不是解析表单！因为前面我们改成了表单传参 (URLEncoding.default)，
+        // 导致 Spring 拿到了 "deviceCode=test_device" 这个纯文本，当做 JSON 解析时报了错。
+        // 所以我们必须切回 JSONEncoding.default。
+        NetworkManager.shared.request(APIService.User.bindingDevice, method: .post, parameters: params, encoding: Alamofire.JSONEncoding.default, completion: completion)
     }
 }

@@ -7,7 +7,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let window = UIWindow(windowScene: windowScene)
-        
+
+        // 限制仅 iPhone 使用：iPad / Mac 上直接展示不支持提示
+        if !DeviceSupport.isSupported {
+            window.rootViewController = UnsupportedDeviceViewController()
+            self.window = window
+            window.makeKeyAndVisible()
+            return
+        }
+
         // 全局配置导航栏样式 (透明背景、白色文字、白色返回按钮)
         let navAppearance = UINavigationBarAppearance()
         navAppearance.configureWithTransparentBackground()

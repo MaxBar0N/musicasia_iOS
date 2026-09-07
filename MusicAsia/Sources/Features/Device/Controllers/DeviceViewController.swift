@@ -14,6 +14,16 @@ class DeviceViewController: BaseViewController {
         super.viewDidLoad()
         title = "设备"
         setupUI()
+        setupNavigationBar()
+    }
+
+    private func setupNavigationBar() {
+        let addButton = UIButton(type: .system)
+        addButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        addButton.tintColor = .white
+        addButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        addButton.addTarget(self, action: #selector(showAddPopup), for: .touchUpInside)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: addButton)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -54,42 +64,49 @@ class DeviceViewController: BaseViewController {
     }
     
     private func loadData() {
-        self.listStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        self.emptyView?.removeFromSuperview()
-        self.emptyView = nil
-        
-        let devices = DeviceDataManager.shared.userDevices
-        
-        // 模拟刷新延迟
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+        showLoading()
+        DeviceDataManager.shared.loadDevices { [weak self] result in
             guard let self = self else { return }
+            self.hideLoading()
             self.refreshControl.endRefreshing()
-            
-            if devices.isEmpty {
-                self.showEmptyState()
-            } else {
-                for device in devices {
-                    let row = DeviceRowView()
-                    row.configure(device: device)
-                    
-                    row.onDeleteTapped = { [weak self] in
-                        self?.handleDelete(device: device)
+
+            self.listStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            self.emptyView?.removeFromSuperview()
+            self.emptyView = nil
+
+            switch result {
+            case .success(let devices):
+                if devices.isEmpty {
+                    self.showEmptyState()
+                } else {
+                    for device in devices {
+                        let row = DeviceRowView()
+                        row.configure(device: device)
+
+                        row.onDeleteTapped = { [weak self] in
+                            self?.handleDelete(device: device)
+                        }
+
+                        self.listStack.addArrangedSubview(row)
+                        row.snp.makeConstraints { make in make.height.equalTo(60) }
                     }
-                    
-                    self.listStack.addArrangedSubview(row)
-                    row.snp.makeConstraints { make in make.height.equalTo(60) }
+
+                    self.view.layoutIfNeeded()
                 }
-                
-                self.view.layoutIfNeeded()
+            case .failure(let error):
+                self.showAlert(message: error.localizedDescription)
             }
         }
     }
-    
+
     private func showEmptyState() {
         if emptyView == nil {
             emptyView = DeviceEmptyView()
         }
-        
+        emptyView?.onBindTapped = { [weak self] in
+            self?.showAddPopup()
+        }
+
         view.addSubview(emptyView!)
         emptyView?.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(100)

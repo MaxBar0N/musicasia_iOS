@@ -12,11 +12,11 @@ enum NetworkError: Error {
     
     var localizedDescription: String {
         switch self {
-        case .invalidURL: return "无效的 URL"
-        case .noData: return "未返回任何数据"
+        case .invalidURL: return "无效的请求地址"
+        case .noData: return "未获取到数据"
         case .decodingError: return "数据解析失败"
-        case .serverError(let code, let msg): return "服务器错误 [\(code)]: \(msg)"
-        case .unknown(let error): return "未知错误: \(error.localizedDescription)"
+        case .serverError(_, let msg): return msg
+        case .unknown(_): return "网络异常，请稍后重试"
         }
     }
 }
@@ -119,7 +119,7 @@ class NetworkManager {
     private let session: Session
     
     // 全局基础 URL
-    private let baseURL = APIConfig.baseURL
+    private var baseURL: String { APIConfig.baseURL }
     
     private init() {
         let configuration = URLSessionConfiguration.default
@@ -159,6 +159,7 @@ class NetworkManager {
     func request<T: Decodable>(_ endpoint: String, 
                                method: HTTPMethod = .get, 
                                parameters: Parameters? = nil, 
+                               encoding: ParameterEncoding? = nil,
                                completion: @escaping (Result<T, NetworkError>) -> Void) {
         
         let urlString = endpoint.hasPrefix("http") ? endpoint : baseURL + endpoint
@@ -169,12 +170,12 @@ class NetworkManager {
  
         // 恢复默认的编码方式：GET 用 URLEncoding，POST 等用 JSONEncoding
         // 从最新的后端报错日志看，后端实际上确实期待 JSON 格式的请求体，所以不能强制转为 URLEncoding
-        let encoding: ParameterEncoding = (method == .get) ? URLEncoding.default : JSONEncoding.default
+        let finalEncoding: ParameterEncoding = encoding ?? ((method == .get) ? URLEncoding.default : JSONEncoding.default)
         
         session.request(url, 
                         method: method, 
                         parameters: parameters, 
-                        encoding: encoding, 
+                        encoding: finalEncoding, 
                         headers: commonHeaders())
             .validate(statusCode: 200..<300)
             .responseData { response in
@@ -196,13 +197,22 @@ class NetworkManager {
                     }
                     
                     var errorMsg = error.localizedDescription
+                    var isBizMsg = false
+                    
+                    // 尝试从返回的 data 中解析出后端的错误字段
+                    if let backendMsg = self.extractBackendErrorMessage(from: response.data) {
+                        errorMsg = backendMsg
+                        isBizMsg = true
+                    }
+                    
                     if let statusCode = response.response?.statusCode {
                         if statusCode == 401 {
                             self.handleTokenExpiration()
                         }
-                        completion(.failure(.serverError(statusCode: statusCode, message: "HTTP Error: \(errorMsg)")))
+                        let finalMsg = isBizMsg ? errorMsg : "服务器响应异常，请稍后重试"
+                        completion(.failure(.serverError(statusCode: statusCode, message: finalMsg)))
                     } else {
-                        completion(.failure(.unknown(error)))
+                        completion(.failure(.serverError(statusCode: -1, message: "网络连接异常，请稍后重试")))
                     }
                     return
                 }
@@ -271,18 +281,26 @@ class NetworkManager {
             .responseDecodable(of: BasePageResponse<T>.self) { response in
                 if let error = response.error {
                     var errorMsg = error.localizedDescription
-                    if case let .responseSerializationFailed(reason) = error,
+                    var isBizMsg = false
+                    
+                    // 尝试从返回的 data 中解析出后端的错误字段
+                    if let backendMsg = self.extractBackendErrorMessage(from: response.data) {
+                        errorMsg = backendMsg
+                        isBizMsg = true
+                    } else if case let .responseSerializationFailed(reason) = error,
                        case let .decodingFailed(decodingError) = reason {
                         errorMsg = "解析失败: \(decodingError)"
                         print("❌ JSON 分页解析严重失败: \(decodingError)")
                     }
+                    
                     if let statusCode = response.response?.statusCode {
                         if statusCode == 401 {
                             self.handleTokenExpiration()
                         }
-                        completion(.failure(.serverError(statusCode: statusCode, message: "HTTP Error: \(errorMsg)")))
+                        let finalMsg = isBizMsg ? errorMsg : "服务器响应异常，请稍后重试"
+                        completion(.failure(.serverError(statusCode: statusCode, message: finalMsg)))
                     } else {
-                        completion(.failure(.unknown(error)))
+                        completion(.failure(.serverError(statusCode: -1, message: "网络连接异常，请稍后重试")))
                     }
                     return
                 }
@@ -315,9 +333,10 @@ class NetworkManager {
     /// 极简 API 供 Swift 5.5+ async/await 调用 (推荐使用)
     func requestAsync<T: Decodable>(_ endpoint: String, 
                                     method: HTTPMethod = .get, 
-                                    parameters: Parameters? = nil) async throws -> T {
+                                    parameters: Parameters? = nil,
+                                    encoding: ParameterEncoding? = nil) async throws -> T {
         return try await withCheckedThrowingContinuation { continuation in
-            request(endpoint, method: method, parameters: parameters) { (result: Result<T, NetworkError>) in
+            request(endpoint, method: method, parameters: parameters, encoding: encoding) { (result: Result<T, NetworkError>) in
                 switch result {
                 case .success(let data):
                     continuation.resume(returning: data)
@@ -377,7 +396,22 @@ class NetworkManager {
             }
             .responseDecodable(of: UserInfoBaseResponse<T>.self) { response in
                 if let error = response.error {
-                    completion(.failure(.serverError(statusCode: response.response?.statusCode ?? 500, message: error.localizedDescription)))
+                    var errorMsg = error.localizedDescription
+                    var isBizMsg = false
+                    if let backendMsg = self.extractBackendErrorMessage(from: response.data) {
+                        errorMsg = backendMsg
+                        isBizMsg = true
+                    }
+                    
+                    if let statusCode = response.response?.statusCode {
+                        if statusCode == 401 {
+                            self.handleTokenExpiration()
+                        }
+                        let finalMsg = isBizMsg ? errorMsg : "服务器响应异常，请稍后重试"
+                        completion(.failure(.serverError(statusCode: statusCode, message: finalMsg)))
+                    } else {
+                        completion(.failure(.serverError(statusCode: -1, message: "网络连接异常，请稍后重试")))
+                    }
                     return
                 }
                 
@@ -461,23 +495,31 @@ class NetworkManager {
                 print("🌐 API Upload Response [\(endpoint)]: \(str)")
             }
             
-            if let error = response.error {
-                // 如果网络超时，给予明确的提示
-                if let underlyingError = error.underlyingError as? URLError, underlyingError.code == .timedOut {
-                    completion(.failure(.serverError(statusCode: -1001, message: "图片上传超时，请检查网络后重试")))
+                if let error = response.error {
+                    // 如果网络超时，给予明确的提示
+                    if let underlyingError = error.underlyingError as? URLError, underlyingError.code == .timedOut {
+                        completion(.failure(.serverError(statusCode: -1001, message: "图片上传超时，请检查网络后重试")))
+                        return
+                    }
+                    
+                    var errorMsg = error.localizedDescription
+                    var isBizMsg = false
+                    if let backendMsg = self.extractBackendErrorMessage(from: response.data) {
+                        errorMsg = backendMsg
+                        isBizMsg = true
+                    }
+                    
+                    if let statusCode = response.response?.statusCode {
+                        if statusCode == 401 {
+                            self.handleTokenExpiration()
+                        }
+                        let finalMsg = isBizMsg ? errorMsg : "服务器响应异常，请稍后重试"
+                        completion(.failure(.serverError(statusCode: statusCode, message: finalMsg)))
+                    } else {
+                        completion(.failure(.serverError(statusCode: -1, message: "网络连接异常，请稍后重试")))
+                    }
                     return
                 }
-                
-                if let statusCode = response.response?.statusCode {
-                    if statusCode == 401 {
-                        self.handleTokenExpiration()
-                    }
-                    completion(.failure(.serverError(statusCode: statusCode, message: "Upload Error: \(error.localizedDescription)")))
-                } else {
-                    completion(.failure(.unknown(error)))
-                }
-                return
-            }
             
             guard let data = response.data else {
                 completion(.failure(.noData))
@@ -530,5 +572,24 @@ class NetworkManager {
                 UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
             }
         }
+    }
+    
+    /// 尝试从后端返回的 data 中提取业务错误信息，依次查找 msg, message, error
+    private func extractBackendErrorMessage(from data: Data?) -> String? {
+        guard let data = data,
+              let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return nil
+        }
+        
+        if let msg = json["msg"] as? String, !msg.isEmpty {
+            return msg
+        }
+        if let message = json["message"] as? String, !message.isEmpty {
+            return message
+        }
+        if let error = json["error"] as? String, !error.isEmpty {
+            return error
+        }
+        return nil
     }
 }
