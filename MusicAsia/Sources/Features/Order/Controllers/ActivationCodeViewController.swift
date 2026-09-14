@@ -11,7 +11,7 @@ class ActivationCodeViewController: BaseViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "查看激活码"
+        title = "查看套餐"
         setupUI()
     }
     
@@ -128,7 +128,7 @@ class ActivationCodeViewController: BaseViewController {
     // MARK: - Actions
     private func handleCopy(code: String) {
         UIPasteboard.general.string = code
-        print("复制了激活码: \(code)")
+        print("复制了TV套餐码: \(code)")
         
         guard let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) else { return }
         

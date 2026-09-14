@@ -58,7 +58,7 @@ class OrderRowView: UIView {
         addSubview(timeLabel)
         
         // Button
-        viewCodeButton.setTitle("查看激活码", for: .normal)
+        viewCodeButton.setTitle("查看套餐", for: .normal)
         viewCodeButton.titleLabel?.font = .systemFont(ofSize: 12, weight: .medium)
         viewCodeButton.customCornerRadius = 14
         viewCodeButton.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
@@ -218,7 +218,7 @@ class CopySuccessPopupView: UIView {
         containerView.addSubview(closeBtn)
         
         let msgLabel = UILabel()
-        msgLabel.text = "激活码已拷贝到剪切板，可以进入联通或唱吧\n开通"
+        msgLabel.text = "TV端套餐码已拷贝到剪切板\n请前往联通或唱吧TV端开通使用"
         msgLabel.textColor = .white
         msgLabel.font = .systemFont(ofSize: 14)
         msgLabel.numberOfLines = 0

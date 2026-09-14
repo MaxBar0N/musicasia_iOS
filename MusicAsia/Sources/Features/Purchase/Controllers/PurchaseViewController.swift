@@ -286,7 +286,7 @@ class PurchaseViewController: BaseViewController {
         applePayView.addSubview(appleIcon)
         
         let appleLabel = UILabel()
-        appleLabel.text = "Apple Pay (苹果内购)"
+        appleLabel.text = "App Store (苹果内购)"
         appleLabel.textColor = .white
         applePayView.addSubview(appleLabel)
         

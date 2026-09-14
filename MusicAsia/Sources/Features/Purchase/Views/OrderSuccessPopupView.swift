@@ -66,7 +66,7 @@ class OrderSuccessPopupView: UIView {
         homeButton.addTarget(self, action: #selector(homeAction), for: .touchUpInside)
         containerView.addSubview(homeButton)
         
-        receiveCodeButton.setTitle("领取VIP激活码", for: .normal)
+        receiveCodeButton.setTitle("查看套餐", for: .normal)
         receiveCodeButton.customCornerRadius = 22
         receiveCodeButton.addTarget(self, action: #selector(receiveCodeAction), for: .touchUpInside)
         containerView.addSubview(receiveCodeButton)
