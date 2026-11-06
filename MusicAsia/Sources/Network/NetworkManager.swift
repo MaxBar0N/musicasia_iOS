@@ -258,6 +258,7 @@ class NetworkManager {
     func requestPage<T: Decodable>(_ endpoint: String,
                                    method: HTTPMethod = .get,
                                    parameters: Parameters? = nil,
+                                   cachePolicy: URLRequest.CachePolicy? = nil,
                                    completion: @escaping (Result<BasePageResponse<T>, NetworkError>) -> Void) {
         let urlString = endpoint.hasPrefix("http") ? endpoint : baseURL + endpoint
         guard let url = URL(string: urlString) else {
@@ -271,7 +272,11 @@ class NetworkManager {
                         method: method,
                         parameters: parameters,
                         encoding: encoding,
-                        headers: commonHeaders())
+                        headers: commonHeaders()) { urlRequest in
+            if let cachePolicy {
+                urlRequest.cachePolicy = cachePolicy
+            }
+        }
             .validate(statusCode: 200..<300)
             .responseData { response in
                 if let data = response.data, let str = String(data: data, encoding: .utf8) {

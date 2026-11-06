@@ -778,6 +778,7 @@ class PurchaseViewController: BaseViewController {
     }
     
     private func showSuccessPopup(orderNo: String) {
+        NotificationCenter.default.post(name: NSNotification.Name("UserMembershipChanged"), object: nil)
         let popup = OrderSuccessPopupView()
         popup.configure(orderNo: orderNo)
         popup.show(in: self.navigationController?.view ?? self.view)

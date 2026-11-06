@@ -23,9 +23,6 @@ class DeviceViewController: BaseViewController {
         addButton.tintColor = .white
         addButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         addButton.addTarget(self, action: #selector(showAddPopup), for: .touchUpInside)
-        
-        // 暂时屏蔽添加设备入口
-        addButton.isHidden = true
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: addButton)
     }
     

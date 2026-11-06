@@ -167,9 +167,13 @@ class ProfileCardView: UIView {
         return view
     }
     
+    func updateExpiration(_ expiration: String) {
+        vipLabel.text = "会员到期：\(expiration)"
+    }
+    
     func configure(with profile: UserProfile) {
         nameLabel.text = profile.name.isEmpty ? "用户" : profile.name
-        vipLabel.text = "会员到期：\(profile.formattedExpiration)"
+        updateExpiration(profile.formattedExpiration)
         
         let placeholder = UIImage(systemName: "person.circle.fill")
         if let url = URL(string: profile.avatarUrl), !profile.avatarUrl.isEmpty {

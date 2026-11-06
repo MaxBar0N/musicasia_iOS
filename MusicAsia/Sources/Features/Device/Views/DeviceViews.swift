@@ -43,7 +43,6 @@ class DeviceEmptyView: UIView {
         bindButton.setTitle("绑定设备", for: .normal)
         bindButton.customCornerRadius = 22
         bindButton.addTarget(self, action: #selector(bindTapped), for: .touchUpInside)
-        bindButton.isHidden = true // 暂时屏蔽添加设备入口
         addSubview(bindButton)
 
         bindButton.snp.makeConstraints { make in

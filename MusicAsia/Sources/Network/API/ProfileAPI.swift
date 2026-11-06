@@ -43,7 +43,14 @@ class ProfileAPI {
     // 获取“我的”首页数据（包含用户信息和分页收藏歌曲）
     static func getMeInfo(pageNum: Int, pageSize: Int, completion: @escaping (Result<BasePageResponse<UserCollectionSongsResp>, NetworkError>) -> Void) {
         let params: [String: Any] = ["pageNum": pageNum, "pageSize": pageSize]
-        NetworkManager.shared.requestPage(APIService.User.me, method: .get, parameters: params, completion: completion)
+        // 会员到期时间以服务端为准，不能命中上一次 GET 的本地缓存
+        NetworkManager.shared.requestPage(
+            APIService.User.me,
+            method: .get,
+            parameters: params,
+            cachePolicy: .reloadIgnoringLocalCacheData,
+            completion: completion
+        )
     }
     
     // 获取纯用户信息（用于登录后拉取账户类型）

@@ -8,6 +8,7 @@ class AudioPlayerManager {
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var statusObservation: NSKeyValueObservation?
+    private var playbackEndObserver: NSObjectProtocol?
     
     var isPlaying: Bool {
         return player?.rate != 0 && player?.error == nil
@@ -28,6 +29,7 @@ class AudioPlayerManager {
 
         playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
+        observePlaybackEnd(of: playerItem)
 
         // 监听播放项状态，加载失败时重置播放状态
         statusObservation = playerItem?.observe(\.status, options: [.new]) { [weak self] item, _ in
@@ -62,9 +64,34 @@ class AudioPlayerManager {
         player?.pause()
         statusObservation?.invalidate()
         statusObservation = nil
+        removePlaybackEndObserver()
         player = nil
         playerItem = nil
         NotificationCenter.default.post(name: NSNotification.Name("PlayerStateChanged"), object: nil)
+    }
+
+    private func observePlaybackEnd(of item: AVPlayerItem?) {
+        removePlaybackEndObserver()
+        guard let item = item else { return }
+        playbackEndObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: item,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handlePlaybackEnded()
+        }
+    }
+
+    private func removePlaybackEndObserver() {
+        if let playbackEndObserver = playbackEndObserver {
+            NotificationCenter.default.removeObserver(playbackEndObserver)
+            self.playbackEndObserver = nil
+        }
+    }
+
+    private func handlePlaybackEnded() {
+        removePlaybackEndObserver()
+        NotificationCenter.default.post(name: NSNotification.Name("PlaybackDidFinish"), object: nil)
     }
 }
 
@@ -73,6 +100,13 @@ class SongPlaybackManager {
     
     var currentSongName: String?
     var currentSongSecret: String?
+
+    private var playbackQueue: [Song] = []
+    private var playbackIndex: Int?
+    private var playbackIsTrial = false
+    private weak var playbackHost: UIViewController?
+    private var isAutoAdvancing = false
+    private var advancedFromSecret: String?
     
     private init() {
         // 监听播放失败通知，清除当前歌曲标记
@@ -82,6 +116,12 @@ class SongPlaybackManager {
             name: NSNotification.Name("PlaybackFailed"),
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handlePlaybackDidFinish),
+            name: NSNotification.Name("PlaybackDidFinish"),
+            object: nil
+        )
     }
 
     @objc private func handlePlaybackFailed() {
@@ -89,10 +129,74 @@ class SongPlaybackManager {
         currentSongSecret = nil
     }
 
+    @objc private func handlePlaybackDidFinish() {
+        guard let secret = currentSongSecret, advancedFromSecret != secret else { return }
+        guard let index = playbackIndex, index + 1 < playbackQueue.count else {
+            AudioPlayerManager.shared.pause()
+            return
+        }
+        guard let viewController = playbackPresenter() else { return }
+
+        let nextIndex = index + 1
+        let nextSong = playbackQueue[nextIndex]
+        playbackIndex = nextIndex
+        advancedFromSecret = secret
+        isAutoAdvancing = true
+        playSong(
+            songName: nextSong.name,
+            songSecret: nextSong.url,
+            isDownloaded: nextSong.isDownloaded,
+            isTrial: playbackIsTrial,
+            in: viewController
+        )
+        isAutoAdvancing = false
+    }
+
+    private func playbackPresenter() -> UIViewController? {
+        if let top = Self.topViewController() {
+            return top
+        }
+        return playbackHost
+    }
+
+    private static func topViewController() -> UIViewController? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let window = scenes.flatMap { $0.windows }.first { $0.isKeyWindow }
+        guard var top = window?.rootViewController else { return nil }
+        while true {
+            if let presented = top.presentedViewController {
+                top = presented
+            } else if let navigation = top as? UINavigationController, let visible = navigation.visibleViewController {
+                top = visible
+            } else if let tab = top as? UITabBarController, let selected = tab.selectedViewController {
+                top = selected
+            } else {
+                return top
+            }
+        }
+    }
+
     func stop() {
         AudioPlayerManager.shared.stop()
         currentSongName = nil
         currentSongSecret = nil
+        clearPlaybackQueue()
+    }
+
+    /// 专辑、收藏列表加载更多后，把还没唱到的歌补进当前队列。
+    func syncPlaybackQueue(with songs: [Song], host: UIViewController) {
+        guard playbackHost === host, let secret = currentSongSecret,
+              let index = songs.firstIndex(where: { $0.url == secret }) else { return }
+        playbackQueue = songs
+        playbackIndex = index
+    }
+
+    private func clearPlaybackQueue() {
+        playbackQueue = []
+        playbackIndex = nil
+        playbackHost = nil
+        playbackIsTrial = false
+        advancedFromSecret = nil
     }
 
     /// 播放失败时重置为最初始状态：清除当前歌曲并停止播放
@@ -115,9 +219,11 @@ class SongPlaybackManager {
                   isDownloaded: Bool = false,
                   isTrial: Bool = false,
                   in viewController: UIViewController,
+                  playbackQueue: [Song]? = nil,
+                  playbackIndex: Int? = nil,
                   onSuccess: (() -> Void)? = nil) {
         
-        if currentSongSecret == songSecret {
+        if !isAutoAdvancing && currentSongSecret == songSecret {
             if AudioPlayerManager.shared.isPlaying {
                 AudioPlayerManager.shared.pause()
             } else {
@@ -125,6 +231,20 @@ class SongPlaybackManager {
             }
             onSuccess?()
             return
+        }
+
+        if !isAutoAdvancing {
+            advancedFromSecret = nil
+            if let playbackQueue = playbackQueue,
+               let playbackIndex = playbackIndex,
+               playbackQueue.indices.contains(playbackIndex) {
+                self.playbackQueue = playbackQueue
+                self.playbackIndex = playbackIndex
+                self.playbackIsTrial = isTrial
+                self.playbackHost = viewController
+            } else {
+                clearPlaybackQueue()
+            }
         }
         
         print("准备播放: \(songName)")

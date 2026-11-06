@@ -32,6 +32,8 @@ class ProfileViewController: BaseViewController {
     
     private var isFirstLoad = true
     private var needsRefresh = false
+    /// 只让最后一次用户信息请求更新到期时间，避免续费前的旧响应覆盖新时间
+    private var userInfoRequestToken = 0
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -39,6 +41,7 @@ class ProfileViewController: BaseViewController {
         setupUI()
         NotificationCenter.default.addObserver(self, selector: #selector(playerStateChanged), name: NSNotification.Name("PlayerStateChanged"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(collectionChanged), name: NSNotification.Name("UserCollectionChanged"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(membershipChanged), name: NSNotification.Name("UserMembershipChanged"), object: nil)
     }
     
     deinit {
@@ -48,18 +51,20 @@ class ProfileViewController: BaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        
-        if needsRefresh {
-            needsRefresh = false
-            loadInitialData()
-        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        // 等到页面真正出现再刷新。push 购买页时 viewWillAppear 可能提前触发，
+        // 若在那里清掉标记，付完回来就不会再请求，到期时间会停在旧值。
         if isFirstLoad {
             isFirstLoad = false
             loadInitialData()
+        } else if needsRefresh {
+            needsRefresh = false
+            loadInitialData()
+        } else {
+            refreshMembershipInfo()
         }
     }
     
@@ -301,8 +306,38 @@ class ProfileViewController: BaseViewController {
         loadPageData()
     }
     
+    @objc private func membershipChanged() {
+        refreshMembershipInfo()
+    }
+    
+    private func refreshMembershipInfo() {
+        let token = nextUserInfoToken()
+        ProfileAPI.getMeInfo(pageNum: 1, pageSize: 1) { [weak self] result in
+            guard let self = self else { return }
+            guard case .success(let pageResponse) = result, let data = pageResponse.data else { return }
+            let expiration = Self.expirationText(from: data.endTime)
+            DispatchQueue.main.async {
+                guard token == self.userInfoRequestToken else { return }
+                self.headerCard.updateExpiration(expiration)
+            }
+        }
+    }
+    
+    private func nextUserInfoToken() -> Int {
+        userInfoRequestToken += 1
+        return userInfoRequestToken
+    }
+    
+    private static func expirationText(from endTime: String?) -> String {
+        if let endTime, !endTime.isEmpty {
+            return endTime
+        }
+        return "---"
+    }
+    
     private func loadPageData() {
         print("ProfileViewController: loadPageData() page \(currentPage)")
+        let token = nextUserInfoToken()
         isLoading = true
         
         if displaySongs.isEmpty {
@@ -337,12 +372,7 @@ class ProfileViewController: BaseViewController {
                  print("用户信息: \(data.name ?? ""), VIP: \(data.endTime ?? "")")
                   
                   // A、展示个人信息及会员到期时间
-                  let vipExpStr: String
-                  if let endTime = data.endTime, !endTime.isEmpty {
-                      vipExpStr = endTime
-                  } else {
-                      vipExpStr = "---"
-                  }
+                  let vipExpStr = Self.expirationText(from: data.endTime)
                   
                   var logoUrl = data.logo ?? ""
                   logoUrl = logoUrl.replacingOccurrences(of: "\\", with: "/")
@@ -378,7 +408,10 @@ class ProfileViewController: BaseViewController {
                       vipExpiration: nil,
                       formattedExpirationStr: vipExpStr
                   )
-                  self.headerCard.configure(with: profileInfo)
+                  DispatchQueue.main.async {
+                      guard token == self.userInfoRequestToken else { return }
+                      self.headerCard.configure(with: profileInfo)
+                  }
                 
                 self.hasMoreData = newSongs.count == self.pageSize
                 
@@ -408,7 +441,8 @@ class ProfileViewController: BaseViewController {
                     self.songsStack.addArrangedSubview(row)
                     row.snp.makeConstraints { make in make.height.equalTo(44) }
                 }
-                
+
+                SongPlaybackManager.shared.syncPlaybackQueue(with: self.displaySongs, host: self)
                 self.updateFooterPosition()
                 
             case .failure(let error):
@@ -628,7 +662,9 @@ class ProfileViewController: BaseViewController {
             songName: song.name,
             songSecret: song.url,
             isDownloaded: song.isDownloaded,
-            in: self
+            in: self,
+            playbackQueue: displaySongs,
+            playbackIndex: index
         ) { [weak self] in
             // UI更新已经由 playerStateChanged 处理
             print("Profile: playSong success callback")

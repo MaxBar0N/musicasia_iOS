@@ -263,6 +263,9 @@ class SongViewController: BaseViewController {
                 } else {
                     self.displaySongs.append(contentsOf: uiSongs)
                 }
+                if self.sourceAlbumId != nil {
+                    SongPlaybackManager.shared.syncPlaybackQueue(with: self.displaySongs, host: self)
+                }
                 self.refreshListUI()
                 self.isLoading = false
                 
@@ -393,11 +396,14 @@ class SongViewController: BaseViewController {
     }
     
     private func handlePlay(at index: Int, song: Song) {
+        let fromAlbum = sourceAlbumId != nil
         SongPlaybackManager.shared.playSong(
             songName: song.name,
             songSecret: song.url,
             isDownloaded: song.isDownloaded,
-            in: self
+            in: self,
+            playbackQueue: fromAlbum ? displaySongs : nil,
+            playbackIndex: fromAlbum ? index : nil
         ) { [weak self] in
             // UI 更新由 playerStateChanged 处理
             print("SongView: playSong success callback")
